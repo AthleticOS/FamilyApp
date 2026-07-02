@@ -208,17 +208,10 @@
       btn.disabled = true;
       
       try {
-        // ADDED HEADERS: Forces plain text so Google's firewall lets it through
         const response = await fetch(API_URL, { 
           method: "POST", 
-          headers: {
-            "Content-Type": "text/plain;charset=utf-8",
-          },
-          body: JSON.stringify({ 
-            action: "verifyPIN", 
-            email: emailInput, 
-            pin: pinInput 
-          }) 
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "verifyPIN", email: emailInput, pin: pinInput }) 
         });
         const result = await response.json();
 
@@ -226,12 +219,13 @@
           sessionStorage.setItem('auth_active_user', "true");
           sessionStorage.setItem('auth_email', emailInput);
           sessionStorage.setItem('user_role', result.role || "Nanny");
+          sessionStorage.setItem('user_name', result.name || emailInput); // Store their name
           
           document.getElementById('pin-screen').style.display = 'none';
           document.getElementById('app-container').style.display = 'block';
           document.getElementById('bottom-nav').style.display = 'flex';
           document.getElementById('btn-signout').style.display = 'block';
-          document.getElementById('user-greeting').innerText = "Logged in: " + emailInput;
+          document.getElementById('user-greeting').innerText = "Logged in: " + sessionStorage.getItem('user_name');
         } else {
           alert("Access Denied: " + result.message);
           btn.innerText = "Login"; 
@@ -247,13 +241,64 @@
       }
     }
 
-    // Placeholder functions for future actions
-    function clockIn() {
-      alert("Clock In logic will be built next!");
+    async function clockIn() {
+      const btn = document.getElementById('btn-clock-in');
+      const email = sessionStorage.getItem('auth_email');
+      
+      btn.innerText = "Processing..."; 
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "clockIn", email: email })
+        });
+        const result = await response.json();
+        
+        if (result.status === "success") {
+          alert(result.message);
+          document.getElementById('btn-clock-in').style.display = 'none';
+          document.getElementById('btn-clock-out').style.display = 'inline-block';
+        } else {
+          alert("Error: " + result.message);
+        }
+      } catch (err) {
+        alert("Network error. Your punch was not saved.");
+      } finally {
+        btn.innerText = "CLOCK IN"; 
+        btn.disabled = false;
+      }
     }
 
-    function clockOut() {
-      alert("Clock Out logic will be built next!");
+    async function clockOut() {
+      const btn = document.getElementById('btn-clock-out');
+      const email = sessionStorage.getItem('auth_email');
+      
+      btn.innerText = "Processing..."; 
+      btn.disabled = true;
+
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST",
+          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "clockOut", email: email })
+        });
+        const result = await response.json();
+        
+        if (result.status === "success") {
+          alert(result.message);
+          document.getElementById('btn-clock-out').style.display = 'none';
+          document.getElementById('btn-clock-in').style.display = 'inline-block';
+        } else {
+          alert("Error: " + result.message);
+        }
+      } catch (err) {
+        alert("Network error. Your punch was not saved.");
+      } finally {
+        btn.innerText = "CLOCK OUT"; 
+        btn.disabled = false;
+      }
     }
 
     function reportLowSupply() {
@@ -267,7 +312,7 @@
         document.getElementById('app-container').style.display = 'block';
         document.getElementById('bottom-nav').style.display = 'flex';
         document.getElementById('btn-signout').style.display = 'block';
-        document.getElementById('user-greeting').innerText = "Logged in: " + sessionStorage.getItem('auth_email');
+        document.getElementById('user-greeting').innerText = "Logged in: " + sessionStorage.getItem('user_name');
       } else {
         document.getElementById('pin-screen').style.display = 'block'; 
       }
