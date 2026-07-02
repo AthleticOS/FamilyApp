@@ -166,8 +166,8 @@
   </div>
 
   <script>
-    // WE WILL INSERT THE NEW GOOGLE APPS SCRIPT URL HERE LATER
-    const API_URL = "YOUR_NEW_APPS_SCRIPT_URL_HERE"; 
+    // CONNECTION TO GOOGLE APPS SCRIPT
+    const API_URL = "https://script.google.com/macros/s/AKfycbxC-bqxIJJXMsz7B7NgYbOf3iEXUPiDWPU9yW_ThsvN8U7bo-4pSU6VdRiomwqqIJbW3A/exec"; 
     
     // UI Logic (Clock)
     setInterval(() => {
@@ -184,26 +184,90 @@
       document.querySelector(`.nav-item[onclick="switchTab('${tabId}')"]`).classList.add('active');
     }
 
-    // =========================================================================
-    // SECURITY & FETCH LOGIC (To be built in Task 3)
-    // =========================================================================
     function signOut() {
       sessionStorage.clear();
       window.location.reload();
     }
 
+    // =========================================================================
+    // SECURITY & FETCH LOGIC
+    // =========================================================================
+    
     async function verifyPin() {
-       // We will connect this to the Google Apps Script in the next step
-       alert("API endpoint not connected yet.");
+      const emailInput = document.getElementById('auth-email').value.trim();
+      const pinInput = document.getElementById('auth-pin').value.trim();
+      const btn = document.getElementById('btn-unlock');
+      
+      if(!emailInput || !pinInput) {
+        alert("Please enter both your Email Address and Passcode.");
+        return;
+      }
+      
+      btn.innerText = "Verifying Credentials..."; 
+      btn.style.backgroundColor = "#64748B"; 
+      btn.disabled = true;
+      
+      try {
+        const response = await fetch(API_URL, { 
+          method: "POST", 
+          body: JSON.stringify({ 
+            action: "verifyPIN", 
+            email: emailInput, 
+            pin: pinInput 
+          }) 
+        });
+        const result = await response.json();
+
+        if (result.status === "success") {
+          // Store session data so they don't have to log in every time they refresh
+          sessionStorage.setItem('auth_active_user', "true");
+          sessionStorage.setItem('auth_email', emailInput);
+          sessionStorage.setItem('user_role', result.role || "Nanny");
+          
+          // Switch UI from Login Screen to App Screen
+          document.getElementById('pin-screen').style.display = 'none';
+          document.getElementById('app-container').style.display = 'block';
+          document.getElementById('bottom-nav').style.display = 'flex';
+          document.getElementById('btn-signout').style.display = 'block';
+          document.getElementById('user-greeting').innerText = "Logged in: " + emailInput;
+        } else {
+          // Failed Login
+          alert("Access Denied: " + result.message);
+          btn.innerText = "Login"; 
+          btn.style.backgroundColor = "var(--primary)"; 
+          btn.disabled = false;
+          document.getElementById('auth-pin').value = '';
+        }
+      } catch (err) {
+        alert("Network error communicating with the database. Please try again.");
+        btn.innerText = "Login"; 
+        btn.style.backgroundColor = "var(--primary)"; 
+        btn.disabled = false;
+      }
+    }
+
+    // Placeholder functions for future actions
+    function clockIn() {
+      alert("Clock In logic will be built next!");
+    }
+
+    function clockOut() {
+      alert("Clock Out logic will be built next!");
+    }
+
+    function reportLowSupply() {
+      alert("Low supply reporting will be built next!");
     }
 
     // STARTUP LOGIC
     document.addEventListener("DOMContentLoaded", () => {
-      // If they are already logged in, show the app. Otherwise, show the PIN screen.
+      // Check if user is already logged in on this browser
       if (sessionStorage.getItem('auth_active_user') === "true") {
         document.getElementById('pin-screen').style.display = 'none';
         document.getElementById('app-container').style.display = 'block';
         document.getElementById('bottom-nav').style.display = 'flex';
+        document.getElementById('btn-signout').style.display = 'block';
+        document.getElementById('user-greeting').innerText = "Logged in: " + sessionStorage.getItem('auth_email');
       } else {
         document.getElementById('pin-screen').style.display = 'block'; 
       }
