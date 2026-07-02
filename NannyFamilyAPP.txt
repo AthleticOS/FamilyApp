@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Family Nanny Hub</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap');
+    :root {
+      --primary: #0F172A; /* Slate 900 */
+      --accent: #3B82F6; /* Blue 500 */
+      --bg: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --text-main: #1E293B;
+      --text-muted: #64748B;
+      --border: #E2E8F0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: var(--bg);
+      color: var(--text-main);
+      margin: 0;
+      padding: 0;
+      padding-bottom: 75px;
+    }
+
+    /* HEADER */
+    header {
+      background-color: var(--primary);
+      color: #fff;
+      padding: 15px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 4px solid var(--accent);
+    }
+    header .header-text h1 { margin: 0; font-size: 1.3rem; font-weight: 800; line-height: 1.1; }
+    header .header-text p { margin: 4px 0 0 0; font-size: 0.8rem; color: #93C5FD; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+
+    /* STATE SCREENS */
+    #loader { text-align: center; padding: 50px; font-weight: 600; color: var(--text-muted); display: none; }
+    
+    /* SECURITY IDENTITY SCREEN */
+    #pin-screen { display: none; padding: 40px 20px; text-align: center; }
+    .pin-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 30px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-width: 350px; margin: 0 auto; }
+    .pin-box h2 { margin-top: 0; font-size: 1.3rem; }
+    .pin-box p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
+    .pin-input { font-size: 1.5rem; text-align: center; letter-spacing: 5px; font-weight: 800; width: 100%; max-width: 200px; padding: 10px; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 20px; outline: none; }
+    .pin-input:focus { border-color: var(--accent); }
+
+    /* APP CONTAINER & CARDS */
+    .container { padding: 15px; display: none; }
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    .card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .card-header { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
+    
+    /* INPUTS & BUTTONS */
+    .text-input, .status-select { border: 2px solid var(--border); border-radius: 6px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; background-color: #fff; width: 100%; padding: 10px; margin-bottom: 15px; box-sizing: border-box; }
+    .btn-submit { width: 100%; background-color: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: background 0.2s; display: block; text-align: center; box-sizing: border-box; }
+    .btn-submit:disabled { background-color: #94A3B8; cursor: not-allowed; opacity: 0.6; }
+    
+    /* SPECIFIC UTILITY CLASSES */
+    .clock-in-btn { background-color: #16A34A; font-size: 1.2rem; padding: 20px; margin-bottom: 10px; }
+    .clock-out-btn { background-color: #DC2626; font-size: 1.2rem; padding: 20px; display: none;}
+    .explainer-box { background-color: #F8FAFC; border-left: 4px solid var(--text-muted); padding: 12px; border-radius: 0 8px 8px 0; margin-bottom: 15px; font-size: 0.8rem; line-height: 1.4; color: #334155; }
+    
+    /* DYNAMIC NAVIGATION MATRIX */
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--card-bg); border-top: 1px solid var(--border); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); display: none; z-index: 200; display: flex;}
+    .nav-item { flex: 1; text-align: center; padding: 15px 0; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); cursor: pointer; text-transform: uppercase; }
+    .nav-item.active { color: var(--primary); border-top: 3px solid var(--accent); background-color: #EFF6FF; }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="header-left">
+      <div class="header-text">
+        <h1>Family Nanny Hub</h1>
+        <p id="user-greeting">Identity Verification Required</p>
+      </div>
+    </div>
+    <button id="btn-signout" onclick="signOut()" style="display:none; background-color:#991B1B; color:#fff; border:none; border-radius:4px; font-size:0.65rem; font-weight:800; padding:6px 10px; cursor:pointer;">SIGN OUT</button>
+  </header>
+
+  <div id="loader">Syncing Database...</div>
+
+  <div id="pin-screen">
+    <div class="pin-box">
+      <h2>Secure Login</h2>
+      <p>Enter your email and passcode.</p>
+      
+      <label style="font-size:0.7rem; color:var(--text-muted); font-weight:800; display:block; text-align:left; margin-bottom:4px; text-transform:uppercase;">Email Address</label>
+      <input type="email" id="auth-email" class="text-input" placeholder="nanny@email.com">
+      
+      <label style="font-size:0.7rem; color:var(--text-muted); font-weight:800; display:block; text-align:left; margin-bottom:4px; text-transform:uppercase;">Passcode</label>
+      <input type="password" id="auth-pin" class="pin-input" pattern="[0-9]*" inputmode="numeric" placeholder="••••">
+      
+      <button class="btn-submit" id="btn-unlock" onclick="verifyPin()">Login</button>
+    </div>
+  </div>
+
+  <div class="container" id="app-container">
+    
+    <div id="tab-timecard" class="tab-content active">
+      <div class="card" style="text-align: center;">
+        <div class="card-header" style="color: var(--primary);">Live Time Punch</div>
+        <h2 id="current-time-display" style="font-size: 2rem; margin: 10px 0;">--:--</h2>
+        <p id="current-date-display" style="color: var(--text-muted); margin-top: 0; margin-bottom: 20px;">--</p>
+        
+        <button class="btn-submit clock-in-btn" id="btn-clock-in" onclick="clockIn()">CLOCK IN</button>
+        <button class="btn-submit clock-out-btn" id="btn-clock-out" onclick="clockOut()">CLOCK OUT</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Time-Off Balances</div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+          <span style="font-weight: 600;">Sick Days Remaining:</span>
+          <span id="sick-balance" style="font-weight: 800; color: var(--accent);">--</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="font-weight: 600;">Personal Days Remaining:</span>
+          <span id="personal-balance" style="font-weight: 800; color: var(--accent);">--</span>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-schedule" class="tab-content">
+      <div class="card">
+        <div class="card-header">Upcoming Shifts & Events</div>
+        <div id="schedule-list">
+          <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading schedule...</p>
+        </div>
+      </div>
+    </div>
+
+    <div id="tab-tasks" class="tab-content">
+      <div class="card">
+        <div class="card-header">Assigned Tasks</div>
+        <div id="tasks-list">
+          <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading tasks...</p>
+        </div>
+      </div>
+      
+      <div class="card">
+        <div class="card-header">Log Depleted Supplies</div>
+        <div class="explainer-box">Select an item below if it is running low. This will immediately alert the family.</div>
+        <select class="status-select" id="low-inventory-select">
+          <option value="">Select Item...</option>
+        </select>
+        <button class="btn-submit" onclick="reportLowSupply()">Report Low Stock</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="bottom-nav" id="bottom-nav" style="display: none;">
+    <div class="nav-item active" onclick="switchTab('timecard')">Timecard</div>
+    <div class="nav-item" onclick="switchTab('schedule')">Schedule</div>
+    <div class="nav-item" onclick="switchTab('tasks')">Tasks</div>
+  </div>
+
+  <script>
+    // WE WILL INSERT THE NEW GOOGLE APPS SCRIPT URL HERE LATER
+    const API_URL = "YOUR_NEW_APPS_SCRIPT_URL_HERE"; 
+    
+    // UI Logic (Clock)
+    setInterval(() => {
+      const now = new Date();
+      document.getElementById('current-time-display').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      document.getElementById('current-date-display').innerText = now.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+    }, 1000);
+
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active')); 
+      document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+      
+      document.getElementById(`tab-${tabId}`).classList.add('active');
+      document.querySelector(`.nav-item[onclick="switchTab('${tabId}')"]`).classList.add('active');
+    }
+
+    // =========================================================================
+    // SECURITY & FETCH LOGIC (To be built in Task 3)
+    // =========================================================================
+    function signOut() {
+      sessionStorage.clear();
+      window.location.reload();
+    }
+
+    async function verifyPin() {
+       // We will connect this to the Google Apps Script in the next step
+       alert("API endpoint not connected yet.");
+    }
+  </script>
+</body>
+</html>
