@@ -208,8 +208,12 @@
       btn.disabled = true;
       
       try {
+        // ADDED HEADERS: Forces plain text so Google's firewall lets it through
         const response = await fetch(API_URL, { 
           method: "POST", 
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8",
+          },
           body: JSON.stringify({ 
             action: "verifyPIN", 
             email: emailInput, 
@@ -219,19 +223,16 @@
         const result = await response.json();
 
         if (result.status === "success") {
-          // Store session data so they don't have to log in every time they refresh
           sessionStorage.setItem('auth_active_user', "true");
           sessionStorage.setItem('auth_email', emailInput);
           sessionStorage.setItem('user_role', result.role || "Nanny");
           
-          // Switch UI from Login Screen to App Screen
           document.getElementById('pin-screen').style.display = 'none';
           document.getElementById('app-container').style.display = 'block';
           document.getElementById('bottom-nav').style.display = 'flex';
           document.getElementById('btn-signout').style.display = 'block';
           document.getElementById('user-greeting').innerText = "Logged in: " + emailInput;
         } else {
-          // Failed Login
           alert("Access Denied: " + result.message);
           btn.innerText = "Login"; 
           btn.style.backgroundColor = "var(--primary)"; 
@@ -261,7 +262,6 @@
 
     // STARTUP LOGIC
     document.addEventListener("DOMContentLoaded", () => {
-      // Check if user is already logged in on this browser
       if (sessionStorage.getItem('auth_active_user') === "true") {
         document.getElementById('pin-screen').style.display = 'none';
         document.getElementById('app-container').style.display = 'block';
