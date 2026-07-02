@@ -45,13 +45,11 @@
     .clock-out-btn { background-color: #DC2626; font-size: 1.2rem; padding: 20px; display: none; margin-bottom: 10px;}
     .explainer-box { background-color: #F8FAFC; border-left: 4px solid var(--text-muted); padding: 12px; border-radius: 0 8px 8px 0; margin-bottom: 15px; font-size: 0.8rem; line-height: 1.4; color: #334155; }
     
-    /* Dynamic Dashboard Metric Styles */
     .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
     .metric-box { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 15px; text-align: center; }
     .metric-title { font-size: 0.7rem; color: #1E40AF; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
     .metric-value { font-size: 1.8rem; color: #1E3A8A; font-weight: 800; }
     
-    /* Shift List Styles */
     .shift-card { background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
     .shift-date { font-weight: 800; color: var(--primary); font-size: 1.05rem; display: flex; justify-content: space-between;}
     .shift-time { font-size: 0.85rem; color: var(--accent); font-weight: 700; margin-top: 2px; }
@@ -107,9 +105,20 @@
         <div class="card-header" style="color: var(--primary);">Live Time Punch</div>
         <h2 id="current-time-display" style="font-size: 2rem; margin: 10px 0;">--:--</h2>
         <p id="current-date-display" style="color: var(--text-muted); margin-top: 0; margin-bottom: 20px;">--</p>
-        
         <button class="btn-submit clock-in-btn" id="btn-clock-in" onclick="clockIn()">CLOCK IN</button>
         <button class="btn-submit clock-out-btn" id="btn-clock-out" onclick="clockOut()">CLOCK OUT</button>
+      </div>
+
+      <div class="card">
+        <div class="card-header">Time-Off Balances</div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+          <span style="font-weight: 600;">Sick Days Remaining:</span>
+          <span id="sick-balance" style="font-weight: 800; color: var(--accent);">--</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="font-weight: 600;">Personal Days Remaining:</span>
+          <span id="personal-balance" style="font-weight: 800; color: var(--accent);">--</span>
+        </div>
       </div>
     </div>
 
@@ -212,7 +221,6 @@
       }
     }
 
-    // NEW: Function to load dynamic data into the portal
     async function loadDashboardData() {
       try {
         const response = await fetch(API_URL, { 
@@ -224,7 +232,11 @@
         
         if(result.status === "success") {
           
-          // 1. Render the Upcoming Schedule
+          // Populate Balances
+          document.getElementById('sick-balance').innerText = result.sickBalance;
+          document.getElementById('personal-balance').innerText = result.personalBalance;
+
+          // Render Schedule
           document.getElementById('metric-shifts').innerText = result.schedule.length;
           const schedList = document.getElementById('schedule-list');
           schedList.innerHTML = "";
@@ -244,28 +256,23 @@
             });
           }
 
-          // 2. Calculate "Hours This Week"
-          // We look at all timecards returned (which are already filtered to this user)
+          // Calculate Hours
           let totalHours = 0;
           const oneWeekAgo = new Date();
           oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
 
           result.timecards.forEach(tc => {
             const tcDate = new Date(tc.date);
-            // If the shift happened in the last 7 days and is completed
             if (tcDate >= oneWeekAgo && tc.status === "Completed" && tc.clockIn && tc.clockOut) {
               const start = new Date("1970-01-01T" + tc.clockIn + "Z");
               const end = new Date("1970-01-01T" + tc.clockOut + "Z");
-              const diffHours = (end - start) / 3600000; // milliseconds to hours
+              const diffHours = (end - start) / 3600000; 
               if(diffHours > 0) totalHours += diffHours;
             }
           });
-
           document.getElementById('metric-hours').innerText = totalHours.toFixed(1);
         }
-      } catch (e) {
-        console.error("Failed to load dashboard data.", e);
-      }
+      } catch (e) { console.error("Failed to load dashboard data.", e); }
     }
 
     function launchApp() {
@@ -273,10 +280,8 @@
       document.getElementById('app-container').style.display = 'block';
       document.getElementById('bottom-nav').style.display = 'flex';
       document.getElementById('btn-signout').style.display = 'block';
-      document.getElementById('user-greeting').innerText = "Logged in: " + sessionStorage.getItem('user_name');
+      document.getElementById('user-greeting').innerText = "Welcome, " + sessionStorage.getItem('user_name');
       updateClockButtons();
-      
-      // Fetch dynamic data from sheet
       loadDashboardData();
     }
 
@@ -295,7 +300,7 @@
         if (result.status === "success") {
           sessionStorage.setItem('has_active_shift', "true");
           updateClockButtons();
-          loadDashboardData(); // Refresh the dashboard silently
+          loadDashboardData(); 
         } else if (result.message === "You are already clocked in.") {
           sessionStorage.setItem('has_active_shift', "true"); updateClockButtons();
         } else alert("Error: " + result.message);
@@ -318,7 +323,7 @@
         if (result.status === "success") {
           sessionStorage.setItem('has_active_shift', "false");
           updateClockButtons(); 
-          loadDashboardData(); // Refresh hours metric
+          loadDashboardData(); 
         } else if (result.message.includes("No active shift found")) {
           sessionStorage.setItem('has_active_shift', "false"); updateClockButtons();
         } else alert("Error: " + result.message);
@@ -329,11 +334,8 @@
     function reportLowSupply() { alert("Low supply reporting will be built next!"); }
 
     document.addEventListener("DOMContentLoaded", () => {
-      if (sessionStorage.getItem('auth_active_user') === "true") {
-        launchApp();
-      } else {
-        document.getElementById('pin-screen').style.display = 'block'; 
-      }
+      if (sessionStorage.getItem('auth_active_user') === "true") { launchApp(); } 
+      else { document.getElementById('pin-screen').style.display = 'block'; }
     });
   </script>
 </body>
