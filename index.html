@@ -196,6 +196,18 @@
        // We will connect this to the Google Apps Script in the next step
        alert("API endpoint not connected yet.");
     }
+
+    // STARTUP LOGIC
+    document.addEventListener("DOMContentLoaded", () => {
+      // If they are already logged in, show the app. Otherwise, show the PIN screen.
+      if (sessionStorage.getItem('auth_active_user') === "true") {
+        document.getElementById('pin-screen').style.display = 'none';
+        document.getElementById('app-container').style.display = 'block';
+        document.getElementById('bottom-nav').style.display = 'flex';
+      } else {
+        document.getElementById('pin-screen').style.display = 'block'; 
+      }
+    });
   </script>
 </body>
 </html>
