@@ -17,11 +17,7 @@
     header .header-text h1 { margin: 0; font-size: 1.3rem; font-weight: 800; line-height: 1.1; }
     header .header-text p { margin: 4px 0 0 0; font-size: 0.8rem; color: #93C5FD; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    @keyframes pulse {
-      0% { transform: scale(0.95); opacity: 0.5; }
-      50% { transform: scale(1.2); opacity: 1; }
-      100% { transform: scale(0.95); opacity: 0.5; }
-    }
+    @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.5; } }
     .pulse-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
     .pulse-dot.syncing { animation: pulse 1s infinite; background-color: #FDE047; }
     .pulse-dot.synced { background-color: #10B981; }
@@ -43,6 +39,7 @@
     
     .text-input, .status-select { border: 2px solid var(--border); border-radius: 6px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; background-color: #fff; width: 100%; padding: 10px; margin-bottom: 15px; box-sizing: border-box; }
     .btn-submit { width: 100%; background-color: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: background 0.2s; display: block; text-align: center; box-sizing: border-box; text-decoration: none;}
+    .btn-submit.secondary { background-color: #E2E8F0; color: #1E293B; }
     
     .clock-in-btn { background-color: #16A34A; font-size: 1.2rem; padding: 20px; margin-bottom: 10px; }
     .clock-out-btn { background-color: #DC2626; font-size: 1.2rem; padding: 20px; display: none; margin-bottom: 10px;}
@@ -51,7 +48,7 @@
     .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
     .metric-box { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 15px; text-align: center; }
     .metric-title { font-size: 0.7rem; color: #1E40AF; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
-    .metric-value { font-size: 1.8rem; color: #1E3A8A; font-weight: 800; }
+    .metric-value { font-size: 1.6rem; color: #1E3A8A; font-weight: 800; }
     
     /* SCHEDULE CARDS & CALENDAR */
     .view-toggle { display: flex; background: #E2E8F0; border-radius: 6px; padding: 3px; margin-bottom: 15px; }
@@ -71,19 +68,26 @@
     .calendar-day-name { text-align: center; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); margin-bottom: 4px; }
     .calendar-day { background: #F8FAFC; border: 1px solid var(--border); border-radius: 4px; padding: 6px; min-height: 45px; text-align: center; font-size: 0.85rem; font-weight: 700; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; }
     
-    /* CALENDAR COLORS */
     .calendar-day.empty { background: transparent; border: none; }
-    .calendar-day.has-shift { background: #DCFCE7; border-color: #86EFAC; color: #166534; cursor: pointer; }      /* Light Green for Workday */
-    .calendar-day.has-off { background: #E0F2FE; border-color: #BAE6FD; color: #075985; cursor: pointer; opacity: 0.8; } /* Light Blue for Off */
-    .calendar-day.has-holiday { background: #FFEDD5; border-color: #FDBA74; color: #9A3412; cursor: pointer; }    /* Orange for Holiday */
-    .calendar-day.has-overtime { background: #FEF08A; border-color: #FDE047; color: #854D0E; cursor: pointer; }   /* Yellow for Overtime */
+    .calendar-day.has-shift { background: #DCFCE7; border-color: #86EFAC; color: #166534; cursor: pointer; }     
+    .calendar-day.has-off { background: #E0F2FE; border-color: #BAE6FD; color: #075985; cursor: pointer; opacity: 0.8; } 
+    .calendar-day.has-holiday { background: #FFEDD5; border-color: #FDBA74; color: #9A3412; cursor: pointer; }    
+    .calendar-day.has-overtime { background: #FEF08A; border-color: #FDE047; color: #854D0E; cursor: pointer; }   
 
-    /* CALENDAR LEGEND */
     .calendar-legend { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 15px; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
     .legend-item { display: flex; align-items: center; gap: 4px; }
     .legend-color { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.1); }
 
     .task-row { display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; }
+
+    /* LEAVE REQUEST MODAL */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 300; display: none; align-items: center; justify-content: center; }
+    .modal-content { background: var(--card-bg); width: 90%; max-width: 400px; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    .leave-history-row { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .leave-status { font-weight: 800; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; }
+    .status-pending { background: #FEF08A; color: #854D0E; }
+    .status-approved { background: #DCFCE7; color: #166534; }
+    .status-denied { background: #FEE2E2; color: #991B1B; }
 
     /* KIOSK / KIDS STYLES */
     .emergency-card { background-color: var(--red-alert); border: 2px solid var(--red-border); border-radius: 8px; padding: 12px; margin-bottom: 15px; }
@@ -121,6 +125,29 @@
 
   <div id="loader">Syncing Database...</div>
 
+  <div class="modal-overlay" id="leave-modal">
+    <div class="modal-content">
+      <h2 style="margin-top: 0; font-size: 1.2rem;">Request Time Off</h2>
+      <label style="font-size:0.75rem; font-weight:800; display:block; margin-bottom:4px;">Date Requested</label>
+      <input type="date" id="leave-date" class="text-input">
+      
+      <label style="font-size:0.75rem; font-weight:800; display:block; margin-bottom:4px;">Type of Leave</label>
+      <select id="leave-type" class="status-select">
+        <option value="Sick">Sick Leave</option>
+        <option value="Personal">Personal Leave</option>
+        <option value="Banked Holiday">Banked Holiday</option>
+      </select>
+
+      <label style="font-size:0.75rem; font-weight:800; display:block; margin-bottom:4px;">Reason / Notes</label>
+      <input type="text" id="leave-reason" class="text-input" placeholder="Optional notes...">
+
+      <div style="display: flex; gap: 10px; margin-top: 10px;">
+        <button class="btn-submit secondary" onclick="closeLeaveModal()">Cancel</button>
+        <button class="btn-submit" id="btn-submit-leave" onclick="submitLeaveRequest()">Submit</button>
+      </div>
+    </div>
+  </div>
+
   <div id="pin-screen">
     <div class="pin-box">
       <h2>Secure Login</h2>
@@ -142,8 +169,8 @@
           <div class="metric-value" id="metric-hours">0.0</div>
         </div>
         <div class="metric-box">
-          <div class="metric-title">Upcoming Shifts</div>
-          <div class="metric-value" id="metric-shifts">0</div>
+          <div class="metric-title">Hours This Month</div>
+          <div class="metric-value" id="metric-month-hours">0.0</div>
         </div>
       </div>
 
@@ -206,18 +233,28 @@
 
     <div id="tab-profile" class="tab-content">
       <div class="card">
-        <div class="card-header">Time-Off Balances</div>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-          <span style="font-weight: 600;">Sick Days Remaining:</span>
+        <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <span>Time-Off & Leave</span>
+          <button class="btn-submit btn-small" style="width:auto; padding:6px 12px; font-size:0.75rem;" onclick="document.getElementById('leave-modal').style.display='flex'">+ Request</button>
+        </div>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px; margin-top: 15px;">
+          <span style="font-weight: 600; font-size: 0.85rem;">Sick Days Remaining:</span>
           <span id="sick-balance" style="font-weight: 800; color: var(--accent);">--</span>
         </div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
-          <span style="font-weight: 600;">Personal Days Remaining:</span>
+          <span style="font-weight: 600; font-size: 0.85rem;">Personal Days Remaining:</span>
           <span id="personal-balance" style="font-weight: 800; color: var(--accent);">--</span>
         </div>
-        <div style="display: flex; justify-content: space-between;">
-          <span style="font-weight: 600;">Banked Holidays:</span>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+          <span style="font-weight: 600; font-size: 0.85rem;">Banked Holidays:</span>
           <span id="banked-balance" style="font-weight: 800; color: #854D0E;">--</span>
+        </div>
+        
+        <div style="margin-top: 15px; border-top: 2px dashed var(--border); padding-top: 15px;">
+          <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Your Leave History</div>
+          <div id="leave-history-list">
+             <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem;">No requests found.</p>
+          </div>
         </div>
       </div>
       <div class="card">
@@ -346,7 +383,6 @@
         html += `<div class="${dayClass}" onclick="alert('${tooltip}')">${day}</div>`;
       }
       
-      // Inject the newly created color legend below the calendar grid
       html += `</div>
       <div class="calendar-legend">
         <div class="legend-item"><div class="legend-color" style="background:#DCFCE7; border-color:#86EFAC;"></div> Workday</div>
@@ -411,13 +447,32 @@
           // Profile & Contracts
           document.getElementById('sick-balance').innerText = result.sickBalance;
           document.getElementById('personal-balance').innerText = result.personalBalance;
-          document.getElementById('banked-balance').innerText = result.accruedHolidays || "0";
+          document.getElementById('banked-balance').innerText = result.accruedHolidays;
           
           const cl = document.getElementById('contract-links'); cl.innerHTML = "";
           if (result.contracts.en) cl.innerHTML += `<a href="${result.contracts.en}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 English Contract</a>`;
           if (result.contracts.th) cl.innerHTML += `<a href="${result.contracts.th}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 สัญญาภาษาไทย</a>`;
           if (result.contracts.la) cl.innerHTML += `<a href="${result.contracts.la}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 ສັນຍາພາສາລາວ</a>`;
           if (cl.innerHTML === "") cl.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No contracts found.</p>`;
+
+          // Leave Requests
+          const leaveList = document.getElementById('leave-history-list'); leaveList.innerHTML = "";
+          if(result.leaveRequests && result.leaveRequests.length > 0) {
+             result.leaveRequests.forEach(req => {
+                let sClass = "status-pending";
+                if(req.status === "Approved") sClass = "status-approved";
+                if(req.status === "Denied" || req.status === "Declined") sClass = "status-denied";
+                
+                leaveList.innerHTML += `
+                  <div class="leave-history-row">
+                    <div><strong>${req.dateStr}</strong><br><span style="color:var(--text-muted); font-size:0.7rem;">${req.type}</span></div>
+                    <div><span class="leave-status ${sClass}">${req.status}</span></div>
+                  </div>
+                `;
+             });
+          } else {
+             leaveList.innerHTML = `<p style="text-align: center; color: var(--text-muted); font-size: 0.8rem;">No requests found.</p>`;
+          }
 
           // Schedule List
           globalAllShifts = result.schedule;
@@ -431,9 +486,8 @@
               let notesHtml = shift.instructions ? `<div class="shift-notes">${shift.instructions}</div>` : '';
               let childBadgeHtml = shift.child ? `<div class="child-badge">👧 ${shift.child}</div>` : '';
               
-              // Location mapping and interactive map link
               let mapQuery = shift.location === "Residence" ? encodeURIComponent("Ban Klang Mueang S-Sense Sathorn-Taksin 2, 2 กท.1001 Bang Kho, Chom Thong, Bangkok 10150, Soi 17, 99/472") : encodeURIComponent(shift.location);
-              let locHtml = shift.location ? `<a href="https://www.google.com/maps/search/?api=1&query=${mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
+              let locHtml = shift.location ? `<a href="http://googleusercontent.com/maps.google.com/5{mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
               
               schedList.innerHTML += `
                 <div class="shift-card">
@@ -451,15 +505,24 @@
           }
 
           // Hours logic
-          let totalHours = 0; const oneWeekAgo = new Date(); oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+          let totalHours = 0; let monthHours = 0;
+          const now = new Date();
+          const oneWeekAgo = new Date(); oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+          const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+          
           result.timecards.forEach(tc => {
             const tcDate = new Date(tc.date);
-            if (tcDate >= oneWeekAgo && tc.status === "Completed" && tc.clockIn && tc.clockOut) {
+            if (tc.status === "Completed" && tc.clockIn && tc.clockOut) {
               const start = new Date("1970-01-01T" + tc.clockIn + "Z"); const end = new Date("1970-01-01T" + tc.clockOut + "Z");
-              const diffHours = (end - start) / 3600000; if(diffHours > 0) totalHours += diffHours;
+              const diffHours = (end - start) / 3600000; 
+              if(diffHours > 0) {
+                 if (tcDate >= oneWeekAgo) totalHours += diffHours;
+                 if (tcDate >= firstOfMonth) monthHours += diffHours;
+              }
             }
           });
           document.getElementById('metric-hours').innerText = totalHours.toFixed(1);
+          document.getElementById('metric-month-hours').innerText = monthHours.toFixed(1);
 
           // Tasks
           const tList = document.getElementById('tasks-list'); tList.innerHTML = "";
@@ -533,7 +596,6 @@
         });
       }
 
-      // Handle the Insurance Image Formatting
       let insuranceDisplay = data.insurance;
       if (data.insurance !== "Not provided" && data.insurance.trim() !== "") {
         let imgUrl = data.insurance;
@@ -598,6 +660,35 @@
           if(result.status === "success") alert("✅ SUCCESS: " + result.message + "\n\nHave a great day!");
         } else alert("Error: " + result.message);
       } catch (err) { alert("Network error."); } finally { btn.innerText = "CLOCK OUT"; btn.disabled = false; }
+    }
+
+    function closeLeaveModal() {
+      document.getElementById('leave-modal').style.display = 'none';
+      document.getElementById('leave-date').value = '';
+      document.getElementById('leave-reason').value = '';
+    }
+
+    async function submitLeaveRequest() {
+      const lDate = document.getElementById('leave-date').value;
+      const lType = document.getElementById('leave-type').value;
+      const lReason = document.getElementById('leave-reason').value;
+      
+      if (!lDate) return alert("Please select a date.");
+      
+      const btn = document.getElementById('btn-submit-leave');
+      btn.innerText = "Submitting..."; btn.disabled = true;
+      
+      try {
+        const response = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, 
+          body: JSON.stringify({ action: "requestLeave", email: sessionStorage.getItem('auth_email'), dateReq: lDate, type: lType, reason: lReason }) 
+        });
+        const result = await response.json();
+        if (result.status === "success") { 
+           alert("✅ Request Submitted!"); 
+           closeLeaveModal();
+           loadDashboardData(); // Refresh to show it in the list
+        } else { alert("Error: " + result.message); }
+      } catch (err) { alert("Network error."); } finally { btn.innerText = "Submit"; btn.disabled = false; }
     }
 
     async function completeTask(taskId) {
