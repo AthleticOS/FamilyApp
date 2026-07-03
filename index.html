@@ -7,23 +7,24 @@
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap');
     :root {
-      --primary: #5B21B6; 
-      --accent: #8B5CF6; 
-      --bg: #F5F3FF; 
-      --card-bg: #FFFFFF;
-      --text-main: #2E1065; 
-      --text-muted: #6B7280; 
-      --border: #DDD6FE; 
-      --red-alert: #FEF2F2; 
-      --red-border: #FECACA; 
-      --red-text: #991B1B;
+      /* Muted Dark Mode Purple Palette */
+      --primary: #5A4B6E;        /* Muted dusk purple for headers and buttons */
+      --accent: #A090B4;         /* Soft desaturated lilac for highlights and text */
+      --bg: #110F15;             /* Deep dark slate with purple undertone */
+      --card-bg: #1A181E;        /* Elevated dark card surface */
+      --text-main: #E8E6EB;      /* Crisp off-white for readability */
+      --text-muted: #8D8896;     /* Muted gray-purple for secondary text */
+      --border: #2F2B36;         /* Subtle dark divider */
+      --red-alert: #2B151A;      /* Dark red background for emergency */
+      --red-border: #5C282F;     /* Muted dark red border */
+      --red-text: #ECA8B1;       /* Soft pink-red for readable alert text */
     }
 
     body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 0; padding-bottom: 75px; }
 
-    header { background-color: var(--primary); color: #fff; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; border-bottom: 4px solid var(--accent); }
+    header { background-color: var(--primary); color: #F3F2F4; padding: 15px 20px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; border-bottom: 3px solid #433753; }
     header .header-text h1 { margin: 0; font-size: 1.3rem; font-weight: 800; line-height: 1.1; }
-    header .header-text p { margin: 4px 0 0 0; font-size: 0.8rem; color: #93C5FD; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+    header .header-text p { margin: 4px 0 0 0; font-size: 0.8rem; color: #D5CDE3; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
     @keyframes pulse { 0% { transform: scale(0.95); opacity: 0.5; } 50% { transform: scale(1.2); opacity: 1; } 100% { transform: scale(0.95); opacity: 0.5; } }
     .pulse-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; margin-right: 4px; }
@@ -32,83 +33,88 @@
 
     #loader { text-align: center; padding: 50px; font-weight: 600; color: var(--text-muted); display: none; }
     #pin-screen { display: none; padding: 40px 20px; text-align: center; }
-    .pin-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 30px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-width: 350px; margin: 0 auto; }
-    .pin-box h2 { margin-top: 0; font-size: 1.3rem; }
+    .pin-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 30px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.3); max-width: 350px; margin: 0 auto; }
+    .pin-box h2 { margin-top: 0; font-size: 1.3rem; color: var(--text-main); }
     .pin-box p { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 20px; }
-    .pin-input { font-size: 1.5rem; text-align: center; letter-spacing: 5px; font-weight: 800; width: 100%; max-width: 200px; padding: 10px; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 20px; outline: none; }
+    .pin-input { background-color: var(--bg); color: var(--text-main); font-size: 1.5rem; text-align: center; letter-spacing: 5px; font-weight: 800; width: 100%; max-width: 200px; padding: 10px; border: 2px solid var(--border); border-radius: 8px; margin-bottom: 20px; outline: none; }
     .pin-input:focus { border-color: var(--accent); }
 
     .container { padding: 15px; display: none; }
     .tab-content { display: none; }
     .tab-content.active { display: block; }
 
-    .card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.02); }
+    .card { background-color: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 15px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
     .card-header { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
     
-    .text-input, .status-select { border: 2px solid var(--border); border-radius: 6px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; background-color: #fff; width: 100%; padding: 10px; margin-bottom: 15px; box-sizing: border-box; }
-    .btn-submit { width: 100%; background-color: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: background 0.2s; display: block; text-align: center; box-sizing: border-box; text-decoration: none;}
-    .btn-submit.secondary { background-color: #E2E8F0; color: #1E293B; }
+    .text-input, .status-select { background-color: var(--bg); color: var(--text-main); border: 2px solid var(--border); border-radius: 6px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; width: 100%; padding: 10px; margin-bottom: 15px; box-sizing: border-box; }
+    .text-input:focus, .status-select:focus { border-color: var(--accent); outline: none; }
     
-    .clock-in-btn { background-color: #16A34A; font-size: 1.2rem; padding: 20px; margin-bottom: 10px; }
-    .clock-out-btn { background-color: #DC2626; font-size: 1.2rem; padding: 20px; display: none; margin-bottom: 10px;}
-    .explainer-box { background-color: #F8FAFC; border-left: 4px solid var(--text-muted); padding: 12px; border-radius: 0 8px 8px 0; margin-bottom: 15px; font-size: 0.8rem; line-height: 1.4; color: #334155; }
+    .btn-submit { width: 100%; background-color: var(--primary); color: #FFF; border: none; padding: 12px; border-radius: 6px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: background 0.2s; display: block; text-align: center; box-sizing: border-box; text-decoration: none;}
+    .btn-submit.secondary { background-color: var(--border); color: var(--text-main); }
+    
+    .clock-in-btn { background-color: #15803D; font-size: 1.2rem; padding: 20px; margin-bottom: 10px; }
+    .clock-out-btn { background-color: #B91C1C; font-size: 1.2rem; padding: 20px; display: none; margin-bottom: 10px;}
+    .explainer-box { background-color: #201D25; border-left: 4px solid var(--accent); padding: 12px; border-radius: 0 8px 8px 0; margin-bottom: 15px; font-size: 0.8rem; line-height: 1.4; color: var(--text-muted); }
     
     .metric-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; }
-    .metric-box { background: #EFF6FF; border: 1px solid #BFDBFE; border-radius: 8px; padding: 15px; text-align: center; }
-    .metric-title { font-size: 0.7rem; color: #1E40AF; font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
-    .metric-value { font-size: 1.6rem; color: #1E3A8A; font-weight: 800; }
+    .metric-box { background: #201D25; border: 1px solid var(--border); border-radius: 8px; padding: 15px; text-align: center; }
+    .metric-title { font-size: 0.7rem; color: var(--accent); font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
+    .metric-value { font-size: 1.6rem; color: var(--text-main); font-weight: 800; }
     
-    .view-toggle { display: flex; background: #E2E8F0; border-radius: 6px; padding: 3px; margin-bottom: 15px; }
+    /* SCHEDULE CARDS & CALENDAR - DARK MODE ADJUSTED */
+    .view-toggle { display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 3px; margin-bottom: 15px; }
     .view-toggle button { flex: 1; border: none; background: transparent; padding: 8px; font-size: 0.8rem; font-weight: 700; border-radius: 4px; color: var(--text-muted); cursor: pointer; }
-    .view-toggle button.active { background: #fff; color: var(--primary); box-shadow: 0 1px 2px rgba(0,0,0,0.1); }
+    .view-toggle button.active { background: #2A2633; color: var(--text-main); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
     
-    .shift-card { background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
-    .shift-date { font-weight: 800; color: var(--primary); font-size: 1.05rem; display: flex; justify-content: space-between;}
+    .shift-card { background: #201D25; border: 1px solid var(--border); border-radius: 8px; padding: 12px; margin-bottom: 10px; }
+    .shift-date { font-weight: 800; color: var(--text-main); font-size: 1.05rem; display: flex; justify-content: space-between;}
     .shift-time { font-size: 0.85rem; color: var(--accent); font-weight: 700; margin-top: 2px; }
-    .shift-type { background: #E2E8F0; color: #1E293B; font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; font-weight: 800;}
+    .shift-type { background: #2F2B36; color: var(--text-main); font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; font-weight: 800;}
     .shift-notes { font-size: 0.8rem; color: var(--text-muted); margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 8px;}
-    .child-badge { display: inline-block; background-color: #FDE047; color: #854D0E; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 12px; margin-top: 6px;}
+    .child-badge { display: inline-block; background-color: #3B3111; color: #FDE047; font-size: 0.7rem; font-weight: 800; padding: 3px 8px; border-radius: 12px; margin-top: 6px;}
 
-    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: 800; font-size: 1.1rem; color: var(--primary); }
-    .calendar-header button { background: var(--bg); border: 1px solid var(--border); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: 800; color: var(--primary); }
+    .calendar-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; font-weight: 800; font-size: 1.1rem; color: var(--accent); }
+    .calendar-header button { background: var(--bg); border: 1px solid var(--border); padding: 5px 12px; border-radius: 6px; cursor: pointer; font-weight: 800; color: var(--accent); }
     .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
     .calendar-day-name { text-align: center; font-size: 0.7rem; font-weight: 800; color: var(--text-muted); margin-bottom: 4px; }
-    .calendar-day { background: #F8FAFC; border: 1px solid var(--border); border-radius: 4px; padding: 6px; min-height: 45px; text-align: center; font-size: 0.85rem; font-weight: 700; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+    .calendar-day { background: #201D25; border: 1px solid var(--border); border-radius: 4px; padding: 6px; min-height: 45px; text-align: center; font-size: 0.85rem; font-weight: 700; position: relative; display: flex; flex-direction: column; justify-content: center; align-items: center; }
     
     .calendar-day.empty { background: transparent; border: none; }
-    .calendar-day.has-shift { background: #DCFCE7; border-color: #86EFAC; color: #166534; cursor: pointer; }     
-    .calendar-day.has-off { background: #E0F2FE; border-color: #BAE6FD; color: #075985; cursor: pointer; opacity: 0.8; } 
-    .calendar-day.has-holiday { background: #FFEDD5; border-color: #FDBA74; color: #9A3412; cursor: pointer; }    
-    .calendar-day.has-overtime { background: #FEF08A; border-color: #FDE047; color: #854D0E; cursor: pointer; }   
+    .calendar-day.has-shift { background: #193122; border-color: #274E35; color: #86EFAC; cursor: pointer; }     
+    .calendar-day.has-off { background: #15273B; border-color: #204163; color: #BAE6FD; cursor: pointer; opacity: 0.8; } 
+    .calendar-day.has-holiday { background: #3D2214; border-color: #633621; color: #FDBA74; cursor: pointer; }    
+    .calendar-day.has-overtime { background: #3B3111; border-color: #5C4D1C; color: #FDE047; cursor: pointer; }   
 
     .calendar-legend { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-top: 15px; font-size: 0.7rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
     .legend-item { display: flex; align-items: center; gap: 4px; }
-    .legend-color { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(0,0,0,0.1); }
+    .legend-color { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.1); }
 
-    .task-row { display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; }
+    .task-row { display: flex; justify-content: space-between; align-items: center; background: #201D25; border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; }
 
-    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 300; display: none; align-items: center; justify-content: center; }
-    .modal-content { background: var(--card-bg); width: 90%; max-width: 400px; border-radius: 12px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+    /* LEAVE REQUEST MODAL - DARK MODE */
+    .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 300; display: none; align-items: center; justify-content: center; }
+    .modal-content { background: var(--card-bg); width: 90%; max-width: 400px; border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid var(--border); }
     .leave-history-row { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 8px 0; border-bottom: 1px solid var(--border); }
     .leave-status { font-weight: 800; font-size: 0.7rem; padding: 2px 6px; border-radius: 4px; }
-    .status-pending { background: #FEF08A; color: #854D0E; }
-    .status-approved { background: #DCFCE7; color: #166534; }
-    .status-denied { background: #FEE2E2; color: #991B1B; }
+    .status-pending { background: #3B3111; color: #FDE047; border: 1px solid #5C4D1C; }
+    .status-approved { background: #193122; color: #86EFAC; border: 1px solid #274E35;}
+    .status-denied { background: #3B1515; color: #FCA5A5; border: 1px solid #5C282F;}
 
+    /* KIOSK / KIDS STYLES */
     .emergency-card { background-color: var(--red-alert); border: 2px solid var(--red-border); border-radius: 8px; padding: 12px; margin-bottom: 15px; }
     .emergency-header { color: var(--red-text); font-weight: 800; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; }
-    .emergency-row { font-size: 0.85rem; margin-bottom: 5px; color: #7F1D1D;}
-    .emergency-row strong { font-weight: 700; }
+    .emergency-row { font-size: 0.85rem; margin-bottom: 5px; color: #D78A94;}
+    .emergency-row strong { font-weight: 700; color: var(--red-text); }
     .routine-row { display: flex; border-bottom: 1px solid var(--border); padding: 10px 0; }
     .routine-row:last-child { border-bottom: none; }
-    .routine-time { width: 80px; font-weight: 800; font-size: 0.8rem; color: var(--primary); flex-shrink: 0; }
+    .routine-time { width: 80px; font-weight: 800; font-size: 0.8rem; color: var(--accent); flex-shrink: 0; }
     .routine-content { flex-grow: 1; }
     .routine-activity { font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 2px; }
     .routine-notes { font-size: 0.8rem; color: var(--text-muted); }
 
-    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--card-bg); border-top: 1px solid var(--border); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); display: none; z-index: 200; display: flex;}
-    .nav-item { flex: 1; text-align: center; padding: 15px 0; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); cursor: pointer; text-transform: uppercase; }
-    .nav-item.active { color: var(--primary); border-top: 3px solid var(--accent); background-color: #EFF6FF; }
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #141217; border-top: 1px solid var(--border); box-shadow: 0 -2px 15px rgba(0,0,0,0.5); display: none; z-index: 200; display: flex;}
+    .nav-item { flex: 1; text-align: center; padding: 15px 0; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); cursor: pointer; text-transform: uppercase; transition: background 0.2s; }
+    .nav-item.active { color: var(--text-main); border-top: 3px solid var(--accent); background-color: #201D25; }
   </style>
 </head>
 <body>
@@ -121,10 +127,10 @@
       </div>
     </div>
     <div class="header-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
-      <div id="sync-container" style="display: none; align-items: center; font-size: 0.65rem; font-weight: 800; color: #93C5FD; text-transform: uppercase;">
+      <div id="sync-container" style="display: none; align-items: center; font-size: 0.65rem; font-weight: 800; color: var(--accent); text-transform: uppercase;">
         <span class="pulse-dot" id="sync-dot"></span> <span id="sync-text"></span>
       </div>
-      <button id="btn-signout" onclick="signOut()" style="display:none; background-color:#991B1B; color:#fff; border:none; border-radius:4px; font-size:0.65rem; font-weight:800; padding:6px 10px; cursor:pointer;">SIGN OUT</button>
+      <button id="btn-signout" onclick="signOut()" style="display:none; background-color:#7F1D1D; color:#fff; border:none; border-radius:4px; font-size:0.65rem; font-weight:800; padding:6px 10px; cursor:pointer;">SIGN OUT</button>
     </div>
   </header>
 
@@ -180,7 +186,7 @@
       </div>
 
       <div class="card" style="text-align: center;">
-        <div class="card-header" style="color: var(--primary);">Live Time Punch</div>
+        <div class="card-header" style="color: var(--accent);">Live Time Punch</div>
         <div class="explainer-box" style="text-align:left;">Location access is required. You must be at the residence to punch in/out.</div>
         <h2 id="current-time-display" style="font-size: 2rem; margin: 10px 0;">--:--</h2>
         <p id="current-date-display" style="color: var(--text-muted); margin-top: 0; margin-bottom: 20px;">--</p>
@@ -198,9 +204,12 @@
           <button id="btn-view-cal" onclick="toggleScheduleView('calendar')">Calendar</button>
         </div>
 
-        <div id="schedule-list"></div>
+        <div id="schedule-list">
+          <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading schedule...</p>
+        </div>
         
-        <div id="schedule-calendar" style="display: none;"></div>
+        <div id="schedule-calendar" style="display: none;">
+          </div>
       </div>
     </div>
 
@@ -220,7 +229,9 @@
       <div class="card">
         <div class="card-header">Assigned Tasks</div>
         <div class="explainer-box">Tap the checkmark when a task is completed to notify the family.</div>
-        <div id="tasks-list"></div>
+        <div id="tasks-list">
+          <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading tasks...</p>
+        </div>
       </div>
       <div class="card">
         <div class="card-header">Log Depleted Supplies</div>
@@ -247,18 +258,22 @@
         </div>
         <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
           <span style="font-weight: 600; font-size: 0.85rem;">Banked Holidays:</span>
-          <span id="banked-balance" style="font-weight: 800; color: #854D0E;">--</span>
+          <span id="banked-balance" style="font-weight: 800; color: var(--accent);">--</span>
         </div>
         
         <div style="margin-top: 15px; border-top: 2px dashed var(--border); padding-top: 15px;">
           <div style="font-size: 0.75rem; font-weight: 800; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px;">Your Leave History</div>
-          <div id="leave-history-list"></div>
+          <div id="leave-history-list">
+             <p style="text-align: center; color: var(--text-muted); font-size: 0.8rem;">No requests found.</p>
+          </div>
         </div>
       </div>
       <div class="card">
         <div class="card-header">Employment Contracts</div>
         <p style="font-size: 0.8rem; color: var(--text-muted);">View your official employment agreements and terms.</p>
-        <div id="contract-links"></div>
+        <div id="contract-links">
+          <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading contracts...</p>
+        </div>
       </div>
     </div>
 
@@ -381,10 +396,10 @@
       
       html += `</div>
       <div class="calendar-legend">
-        <div class="legend-item"><div class="legend-color" style="background:#DCFCE7; border-color:#86EFAC;"></div> Workday</div>
-        <div class="legend-item"><div class="legend-color" style="background:#FEF08A; border-color:#FDE047;"></div> Overtime</div>
-        <div class="legend-item"><div class="legend-color" style="background:#E0F2FE; border-color:#BAE6FD;"></div> Day Off</div>
-        <div class="legend-item"><div class="legend-color" style="background:#FFEDD5; border-color:#FDBA74;"></div> Holiday</div>
+        <div class="legend-item"><div class="legend-color" style="background:#193122; border-color:#274E35;"></div> Workday</div>
+        <div class="legend-item"><div class="legend-color" style="background:#3B3111; border-color:#5C4D1C;"></div> Overtime</div>
+        <div class="legend-item"><div class="legend-color" style="background:#15273B; border-color:#204163;"></div> Day Off</div>
+        <div class="legend-item"><div class="legend-color" style="background:#3D2214; border-color:#633621;"></div> Holiday</div>
       </div>`;
       
       document.getElementById('schedule-calendar').innerHTML = html;
@@ -420,7 +435,7 @@
       const pinInput = document.getElementById('auth-pin').value.trim();
       const btn = document.getElementById('btn-unlock');
       if(!emailInput || !pinInput) return alert("Please enter both your Email Address and Passcode.");
-      btn.innerText = "Verifying Credentials..."; btn.style.backgroundColor = "#64748B"; btn.disabled = true;
+      btn.innerText = "Verifying Credentials..."; btn.style.backgroundColor = "var(--border)"; btn.disabled = true;
       try {
         const response = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "verifyPIN", email: emailInput, pin: pinInput }) });
         const result = await response.json();
@@ -442,12 +457,12 @@
         if(result.status === "success") {
           document.getElementById('sick-balance').innerText = result.sickBalance;
           document.getElementById('personal-balance').innerText = result.personalBalance;
-          document.getElementById('banked-balance').innerText = result.accruedHolidays || "0";
+          document.getElementById('banked-balance').innerText = result.accruedHolidays;
           
           const cl = document.getElementById('contract-links'); cl.innerHTML = "";
-          if (result.contracts.en) cl.innerHTML += `<a href="${result.contracts.en}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 English Contract</a>`;
-          if (result.contracts.th) cl.innerHTML += `<a href="${result.contracts.th}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 สัญญาภาษาไทย</a>`;
-          if (result.contracts.la) cl.innerHTML += `<a href="${result.contracts.la}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 ສັນຍາພາສາລາວ</a>`;
+          if (result.contracts.en) cl.innerHTML += `<a href="${result.contracts.en}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:var(--border); color:var(--text-main);">📄 English Contract</a>`;
+          if (result.contracts.th) cl.innerHTML += `<a href="${result.contracts.th}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:var(--border); color:var(--text-main);">📄 สัญญาภาษาไทย</a>`;
+          if (result.contracts.la) cl.innerHTML += `<a href="${result.contracts.la}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:var(--border); color:var(--text-main);">📄 ສັນຍາພາສາລາວ</a>`;
           if (cl.innerHTML === "") cl.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No contracts found.</p>`;
 
           const leaveList = document.getElementById('leave-history-list'); leaveList.innerHTML = "";
@@ -459,7 +474,7 @@
                 
                 leaveList.innerHTML += `
                   <div class="leave-history-row">
-                    <div><strong>${req.dateStr}</strong><br><span style="color:var(--text-muted); font-size:0.7rem;">${req.type}</span></div>
+                    <div><strong style="color:var(--text-main);">${req.dateStr}</strong><br><span style="color:var(--text-muted); font-size:0.7rem;">${req.type}</span></div>
                     <div><span class="leave-status ${sClass}">${req.status}</span></div>
                   </div>
                 `;
@@ -480,7 +495,7 @@
               let childBadgeHtml = shift.child ? `<div class="child-badge">👧 ${shift.child}</div>` : '';
               
               let mapQuery = shift.location === "Residence" ? encodeURIComponent("Ban Klang Mueang S-Sense Sathorn-Taksin 2, 2 กท.1001 Bang Kho, Chom Thong, Bangkok 10150, Soi 17, 99/472") : encodeURIComponent(shift.location);
-              let locHtml = shift.location ? `<a href="https://www.google.com/maps/search/?api=1&query=${mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
+              let locHtml = shift.location ? `<a href="http://googleusercontent.com/maps.google.com/6{mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
               
               schedList.innerHTML += `
                 <div class="shift-card">
@@ -524,10 +539,10 @@
               tList.innerHTML += `
                 <div class="task-row" id="task-${task.id}">
                   <div>
-                    <strong style="display:block; color:var(--primary);">${task.name}</strong>
+                    <strong style="display:block; color:var(--text-main);">${task.name}</strong>
                     <span style="font-size:0.7rem; color:var(--accent);">Due: ${task.due}</span>
                   </div>
-                  <button class="btn-submit btn-small" style="width:auto; padding:8px 12px; background-color:#16A34A;" onclick="completeTask('${task.id}')">✓</button>
+                  <button class="btn-submit btn-small" style="width:auto; padding:8px 12px; background-color:#15803D;" onclick="completeTask('${task.id}')">✓</button>
                 </div>
               `;
             });
@@ -594,7 +609,7 @@
         
         if (driveMatch) {
           const fileId = driveMatch[1];
-          imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+          imgUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
           insuranceDisplay = `<br><a href="${data.insurance}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-width: 100%; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
         } else if (imgUrl.startsWith("http")) {
           insuranceDisplay = `<br><a href="${data.insurance}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-width: 100%; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
