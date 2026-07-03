@@ -105,6 +105,7 @@
 
       <div class="card" style="text-align: center;">
         <div class="card-header" style="color: var(--primary);">Live Time Punch</div>
+        <div class="explainer-box" style="text-align:left;">Location access is required. You must be at the residence to punch in/out.</div>
         <h2 id="current-time-display" style="font-size: 2rem; margin: 10px 0;">--:--</h2>
         <p id="current-date-display" style="color: var(--text-muted); margin-top: 0; margin-bottom: 20px;">--</p>
         <button class="btn-submit clock-in-btn" id="btn-clock-in" onclick="clockIn()">CLOCK IN</button>
@@ -172,6 +173,55 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxC-bqxIJJXMsz7B7NgYbOf3iEXUPiDWPU9yW_ThsvN8U7bo-4pSU6VdRiomwqqIJbW3A/exec"; 
     
+    // GEOFENCING CONFIGURATION
+    const HOME_LAT = 13.710583;
+    const HOME_LNG = 100.463750;
+    const ALLOWED_RADIUS_METERS = 150;
+
+    function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
+      var R = 6371e3; 
+      var dLat = deg2rad(lat2-lat1);
+      var dLon = deg2rad(lon2-lon1); 
+      var a = Math.sin(dLat/2) * Math.sin(dLat/2) + Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) * Math.sin(dLon/2) * Math.sin(dLon/2); 
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a)); 
+      return R * c; 
+    }
+    function deg2rad(deg) { return deg * (Math.PI/180); }
+
+    function verifyLocationAndExecute(actionCallback) {
+      if (!navigator.geolocation) {
+        alert("Geolocation is not supported by your browser. Cannot verify location.");
+        return;
+      }
+      
+      const btnIn = document.getElementById('btn-clock-in');
+      const btnOut = document.getElementById('btn-clock-out');
+      const origInText = btnIn.innerText;
+      const origOutText = btnOut.innerText;
+      
+      btnIn.innerText = "Checking GPS..."; btnOut.innerText = "Checking GPS...";
+      btnIn.disabled = true; btnOut.disabled = true;
+      
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const dist = getDistanceFromLatLonInM(HOME_LAT, HOME_LNG, position.coords.latitude, position.coords.longitude);
+          if (dist <= ALLOWED_RADIUS_METERS) {
+            actionCallback(); 
+          } else {
+            alert(`Location Error: You are approximately ${Math.round(dist)} meters away. You must be at the residence to punch the clock.`);
+            btnIn.innerText = origInText; btnOut.innerText = origOutText;
+            btnIn.disabled = false; btnOut.disabled = false;
+          }
+        },
+        (error) => {
+          alert("Unable to verify location. Please ensure location services are allowed for this browser/website.");
+          btnIn.innerText = origInText; btnOut.innerText = origOutText;
+          btnIn.disabled = false; btnOut.disabled = false;
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    }
+
     setInterval(() => {
       const now = new Date();
       document.getElementById('current-time-display').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -244,20 +294,16 @@
         const result = await response.json();
         
         if(result.status === "success") {
-          
-          // 1. Populate Balances
           document.getElementById('sick-balance').innerText = result.sickBalance;
           document.getElementById('personal-balance').innerText = result.personalBalance;
 
-          // 2. Populate Contracts
           const cl = document.getElementById('contract-links');
           cl.innerHTML = "";
           if (result.contracts.en) cl.innerHTML += `<a href="${result.contracts.en}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 English Contract</a>`;
           if (result.contracts.th) cl.innerHTML += `<a href="${result.contracts.th}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 สัญญาภาษาไทย</a>`;
-          if (result.contracts.la) cl.innerHTML += `<a href="${result.contracts.la}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 ສັນຍาພາສາລາວ</a>`;
+          if (result.contracts.la) cl.innerHTML += `<a href="${result.contracts.la}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 ສັນຍາພາສາລາວ</a>`;
           if (cl.innerHTML === "") cl.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No contracts found.</p>`;
 
-          // 3. Render Schedule
           document.getElementById('metric-shifts').innerText = result.schedule.length;
           const schedList = document.getElementById('schedule-list');
           schedList.innerHTML = "";
@@ -276,7 +322,6 @@
             });
           }
 
-          // 4. Calculate Hours
           let totalHours = 0;
           const oneWeekAgo = new Date();
           oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -292,7 +337,6 @@
           });
           document.getElementById('metric-hours').innerText = totalHours.toFixed(1);
 
-          // 5. Render Tasks
           const tList = document.getElementById('tasks-list');
           tList.innerHTML = "";
           if (result.tasks.length === 0) {
@@ -311,7 +355,6 @@
             });
           }
 
-          // 6. Render Supply Dropdown
           const sSelect = document.getElementById('low-inventory-select');
           sSelect.innerHTML = '<option value="">Select Item...</option>';
           result.supplies.forEach(sup => {
@@ -337,14 +380,19 @@
       loadDashboardData();
     }
 
-    async function clockIn() {
+    // Wrapped in the GPS Verification Callback
+    function clockIn() { verifyLocationAndExecute(executeClockIn); }
+    function clockOut() { verifyLocationAndExecute(executeClockOut); }
+
+    async function executeClockIn() {
       const btn = document.getElementById('btn-clock-in');
-      btn.innerText = "Processing..."; btn.disabled = true;
+      const email = sessionStorage.getItem('auth_email');
+      btn.innerText = "Writing to Database..."; btn.disabled = true;
 
       try {
         const response = await fetch(API_URL, {
           method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "clockIn", email: sessionStorage.getItem('auth_email') })
+          body: JSON.stringify({ action: "clockIn", email: email })
         });
         const result = await response.json();
         
@@ -352,19 +400,22 @@
           sessionStorage.setItem('has_active_shift', "true");
           updateClockButtons();
           loadDashboardData(); 
+        } else if (result.message === "You are already clocked in.") {
+          sessionStorage.setItem('has_active_shift', "true"); updateClockButtons();
         } else alert("Error: " + result.message);
       } catch (err) { alert("Network error."); } 
       finally { btn.innerText = "CLOCK IN"; btn.disabled = false; }
     }
 
-    async function clockOut() {
+    async function executeClockOut() {
       const btn = document.getElementById('btn-clock-out');
-      btn.innerText = "Processing..."; btn.disabled = true;
+      const email = sessionStorage.getItem('auth_email');
+      btn.innerText = "Writing to Database..."; btn.disabled = true;
 
       try {
         const response = await fetch(API_URL, {
           method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "clockOut", email: sessionStorage.getItem('auth_email') })
+          body: JSON.stringify({ action: "clockOut", email: email })
         });
         const result = await response.json();
         
@@ -372,6 +423,8 @@
           sessionStorage.setItem('has_active_shift', "false");
           updateClockButtons(); 
           loadDashboardData(); 
+        } else if (result.message.includes("No active shift found")) {
+          sessionStorage.setItem('has_active_shift', "false"); updateClockButtons();
         } else alert("Error: " + result.message);
       } catch (err) { alert("Network error."); } 
       finally { btn.innerText = "CLOCK OUT"; btn.disabled = false; }
@@ -379,21 +432,15 @@
 
     async function completeTask(taskId) {
       if(!confirm("Are you sure you want to mark this task as complete?")) return;
-      
       document.getElementById(`task-${taskId}`).style.opacity = "0.5";
-      
       try {
         const response = await fetch(API_URL, {
           method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({ action: "completeTask", taskId: taskId })
         });
         const result = await response.json();
-        if (result.status === "success") {
-          document.getElementById(`task-${taskId}`).style.display = "none";
-        } else {
-          alert("Error: " + result.message);
-          document.getElementById(`task-${taskId}`).style.opacity = "1";
-        }
+        if (result.status === "success") document.getElementById(`task-${taskId}`).style.display = "none";
+        else { alert("Error: " + result.message); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
       } catch (err) { alert("Network error."); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
     }
 
@@ -401,19 +448,14 @@
       const sel = document.getElementById('low-inventory-select');
       const itemId = sel.value;
       if (!itemId) return alert("Please select an item from the list.");
-      
       try {
         const response = await fetch(API_URL, {
           method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({ action: "reportSupply", itemId: itemId })
         });
         const result = await response.json();
-        if (result.status === "success") {
-          alert("The family has been notified. Thank you!");
-          sel.value = "";
-        } else {
-          alert("Error: " + result.message);
-        }
+        if (result.status === "success") { alert("The family has been notified. Thank you!"); sel.value = ""; } 
+        else alert("Error: " + result.message);
       } catch (err) { alert("Network error."); }
     }
 
