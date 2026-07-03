@@ -495,7 +495,7 @@
               let childBadgeHtml = shift.child ? `<div class="child-badge">👧 ${shift.child}</div>` : '';
               
               let mapQuery = shift.location === "Residence" ? encodeURIComponent("Ban Klang Mueang S-Sense Sathorn-Taksin 2, 2 กท.1001 Bang Kho, Chom Thong, Bangkok 10150, Soi 17, 99/472") : encodeURIComponent(shift.location);
-              let locHtml = shift.location ? `<a href="http://googleusercontent.com/maps.google.com/9{mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
+              let locHtml = shift.location ? `<a href="http://googleusercontent.com/maps.google.com/10{mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
               
               schedList.innerHTML += `
                 <div class="shift-card">
@@ -514,28 +514,34 @@
 
           let totalHours = 0; let monthHours = 0;
           const now = new Date();
-          const oneWeekAgo = new Date(); oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
+          const oneWeekAgo = new Date(); oneWeekAgo.setDate(now.getDate() - 7);
           const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
           
           if (result.timecards) {
             result.timecards.forEach(tc => {
-              const tcDate = new Date(tc.date);
-              if (tc.status === "Completed" && tc.clockIn && tc.clockOut) {
-                let inTime = String(tc.clockIn).trim();
-                let outTime = String(tc.clockOut).trim();
+              let tcDate = new Date(tc.date);
+              if (isNaN(tcDate.getTime())) return;
+              
+              if (tc.status.toLowerCase() === "completed" && tc.clockIn && tc.clockOut) {
+                let inParts = String(tc.clockIn).match(/\\d+/g);
+                let outParts = String(tc.clockOut).match(/\\d+/g);
                 
-                if (inTime.split(':').length === 2) inTime += ":00";
-                if (outTime.split(':').length === 2) outTime += ":00";
+                if (inParts && outParts && inParts.length >= 2 && outParts.length >= 2) {
+                  let inH = parseInt(inParts[0], 10);
+                  let inM = parseInt(inParts[1], 10);
+                  if (String(tc.clockIn).toLowerCase().includes('pm') && inH < 12) inH += 12;
+                  if (String(tc.clockIn).toLowerCase().includes('am') && inH === 12) inH = 0;
 
-                const start = new Date("1970-01-01T" + inTime + "Z"); 
-                const end = new Date("1970-01-01T" + outTime + "Z");
-                
-                if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
-                  const diffHours = (end - start) / 3600000; 
-                  if(diffHours > 0) {
-                     if (tcDate >= oneWeekAgo) totalHours += diffHours;
-                     if (tcDate >= firstOfMonth) monthHours += diffHours;
-                  }
+                  let outH = parseInt(outParts[0], 10);
+                  let outM = parseInt(outParts[1], 10);
+                  if (String(tc.clockOut).toLowerCase().includes('pm') && outH < 12) outH += 12;
+                  if (String(tc.clockOut).toLowerCase().includes('am') && outH === 12) outH = 0;
+
+                  let diff = (outH + outM/60) - (inH + inM/60);
+                  if (diff < 0) diff += 24; 
+                  
+                  if (tcDate >= oneWeekAgo) totalHours += diff;
+                  if (tcDate >= firstOfMonth) monthHours += diff;
                 }
               }
             });
