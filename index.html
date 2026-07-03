@@ -328,7 +328,7 @@
         if (dayShifts.length > 0) {
           const shift = dayShifts[0];
           const typeStr = shift.type.toLowerCase();
-          tooltip = `${shift.type}\n${shift.time}`;
+          tooltip = `${shift.type}\\n${shift.time}`;
           
           if (typeStr.includes('holiday')) dayClass += " has-holiday";
           else if (typeStr.includes('off')) dayClass += " has-off";
@@ -411,7 +411,6 @@
           if(globalAllShifts.length === 0) {
             schedList.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No upcoming shifts found.</p>`;
           } else {
-            // Only render the next 15 shifts in list view so it doesn't freeze the phone
             globalAllShifts.slice(0, 15).forEach(shift => {
               let notesHtml = shift.instructions ? `<div class="shift-notes">${shift.instructions}</div>` : '';
               let childBadgeHtml = shift.child ? `<div class="child-badge">👧 ${shift.child}</div>` : '';
@@ -515,20 +514,17 @@
         });
       }
 
-      // 🔴 FIXED GOOGLE DRIVE IMAGE PARSER 🔴
+      // Handle the Insurance Image Formatting
       let insuranceDisplay = data.insurance;
       if (data.insurance !== "Not provided" && data.insurance.trim() !== "") {
         let imgUrl = data.insurance;
-        // Search for the 33-character Google Drive file ID
         const driveMatch = imgUrl.match(/(?:file\/d\/|open\?id=|id=)([\w_-]{25,})/i);
         
         if (driveMatch) {
           const fileId = driveMatch[1];
-          // Use Google's direct thumbnail rendering API which bypasses their recent security blocks
-          imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+          imgUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
           insuranceDisplay = `<br><a href="${data.insurance}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-width: 100%; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
         } else if (imgUrl.startsWith("http")) {
-          // If it's just a normal web image (like Imgur or AWS)
           insuranceDisplay = `<br><a href="${data.insurance}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-width: 100%; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
         } else {
           insuranceDisplay = `<br><span style="font-size: 0.75rem; color: var(--red-text);">*Invalid Image URL.*</span>`;
