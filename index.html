@@ -173,7 +173,6 @@
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxC-bqxIJJXMsz7B7NgYbOf3iEXUPiDWPU9yW_ThsvN8U7bo-4pSU6VdRiomwqqIJbW3A/exec"; 
     
-    // GEOFENCING CONFIGURATION
     const HOME_LAT = 13.710583;
     const HOME_LNG = 100.463750;
     const ALLOWED_RADIUS_METERS = 150;
@@ -189,32 +188,26 @@
     function deg2rad(deg) { return deg * (Math.PI/180); }
 
     function verifyLocationAndExecute(actionCallback) {
-      if (!navigator.geolocation) {
-        alert("Geolocation is not supported by your browser. Cannot verify location.");
-        return;
-      }
+      if (!navigator.geolocation) return alert("Geolocation is not supported by your browser.");
       
       const btnIn = document.getElementById('btn-clock-in');
       const btnOut = document.getElementById('btn-clock-out');
-      const origInText = btnIn.innerText;
-      const origOutText = btnOut.innerText;
-      
+      const origInText = btnIn.innerText; const origOutText = btnOut.innerText;
       btnIn.innerText = "Checking GPS..."; btnOut.innerText = "Checking GPS...";
       btnIn.disabled = true; btnOut.disabled = true;
       
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const dist = getDistanceFromLatLonInM(HOME_LAT, HOME_LNG, position.coords.latitude, position.coords.longitude);
-          if (dist <= ALLOWED_RADIUS_METERS) {
-            actionCallback(); 
-          } else {
+          if (dist <= ALLOWED_RADIUS_METERS) { actionCallback(); } 
+          else {
             alert(`Location Error: You are approximately ${Math.round(dist)} meters away. You must be at the residence to punch the clock.`);
             btnIn.innerText = origInText; btnOut.innerText = origOutText;
             btnIn.disabled = false; btnOut.disabled = false;
           }
         },
         (error) => {
-          alert("Unable to verify location. Please ensure location services are allowed for this browser/website.");
+          alert("Unable to verify location. Please ensure location services are allowed.");
           btnIn.innerText = origInText; btnOut.innerText = origOutText;
           btnIn.disabled = false; btnOut.disabled = false;
         },
@@ -235,10 +228,7 @@
       document.querySelector(`.nav-item[onclick="switchTab('${tabId}')"]`).classList.add('active');
     }
 
-    function signOut() {
-      sessionStorage.clear();
-      window.location.reload();
-    }
+    function signOut() { sessionStorage.clear(); window.location.reload(); }
 
     function updateClockButtons() {
       if (sessionStorage.getItem('has_active_shift') === "true") {
@@ -260,8 +250,7 @@
       
       try {
         const response = await fetch(API_URL, { 
-          method: "POST", 
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
+          method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
           body: JSON.stringify({ action: "verifyPIN", email: emailInput, pin: pinInput }) 
         });
         const result = await response.json();
@@ -272,7 +261,6 @@
           sessionStorage.setItem('user_role', result.role || "Nanny");
           sessionStorage.setItem('user_name', result.name || emailInput);
           sessionStorage.setItem('has_active_shift', result.hasActiveShift ? "true" : "false"); 
-          
           launchApp();
         } else {
           alert("Access Denied: " + result.message);
@@ -287,9 +275,8 @@
     async function loadDashboardData() {
       try {
         const response = await fetch(API_URL, { 
-          method: "POST", 
-          headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "getDashboardData", email: sessionStorage.getItem('auth_email') }) 
+          method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "getDashboardData", email: sessionStorage.getItem('auth_email'), role: sessionStorage.getItem('user_role') }) 
         });
         const result = await response.json();
         
@@ -323,9 +310,7 @@
           }
 
           let totalHours = 0;
-          const oneWeekAgo = new Date();
-          oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-
+          const oneWeekAgo = new Date(); oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
           result.timecards.forEach(tc => {
             const tcDate = new Date(tc.date);
             if (tcDate >= oneWeekAgo && tc.status === "Completed" && tc.clockIn && tc.clockOut) {
@@ -340,7 +325,7 @@
           const tList = document.getElementById('tasks-list');
           tList.innerHTML = "";
           if (result.tasks.length === 0) {
-            tList.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">You have no pending tasks. Great job!</p>`;
+            tList.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No pending tasks. Great job!</p>`;
           } else {
             result.tasks.forEach(task => {
               tList.innerHTML += `
@@ -357,9 +342,8 @@
 
           const sSelect = document.getElementById('low-inventory-select');
           sSelect.innerHTML = '<option value="">Select Item...</option>';
-          result.supplies.forEach(sup => {
-            sSelect.innerHTML += `<option value="${sup.id}">${sup.name}</option>`;
-          });
+          result.supplies.forEach(sup => { sSelect.innerHTML += `<option value="${sup.id}">${sup.name}</option>`; });
+
         }
       } catch (e) { console.error("Failed to load dashboard data.", e); }
     }
@@ -370,66 +354,44 @@
       document.getElementById('bottom-nav').style.display = 'flex';
       document.getElementById('btn-signout').style.display = 'block';
       document.getElementById('user-greeting').innerText = "Welcome, " + sessionStorage.getItem('user_name');
-      
-      const role = String(sessionStorage.getItem('user_role')).toLowerCase();
-      if (role === "nanny") {
-        document.getElementById('nav-profile').style.display = 'block';
-      }
+      document.getElementById('nav-profile').style.display = 'block';
 
-      updateClockButtons();
-      loadDashboardData();
+      updateClockButtons(); loadDashboardData();
     }
 
-    // Wrapped in the GPS Verification Callback
     function clockIn() { verifyLocationAndExecute(executeClockIn); }
     function clockOut() { verifyLocationAndExecute(executeClockOut); }
 
     async function executeClockIn() {
       const btn = document.getElementById('btn-clock-in');
-      const email = sessionStorage.getItem('auth_email');
       btn.innerText = "Writing to Database..."; btn.disabled = true;
-
       try {
         const response = await fetch(API_URL, {
           method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "clockIn", email: email })
+          body: JSON.stringify({ action: "clockIn", email: sessionStorage.getItem('auth_email') })
         });
         const result = await response.json();
-        
-        if (result.status === "success") {
-          sessionStorage.setItem('has_active_shift', "true");
-          updateClockButtons();
-          loadDashboardData(); 
-          alert("✅ SUCCESS: " + result.message + "\n\nReminder: You must remain within 150 meters of the residence to clock out later.");
-        } else if (result.message === "You are already clocked in.") {
-          sessionStorage.setItem('has_active_shift', "true"); updateClockButtons();
+        if (result.status === "success" || result.message === "You are already clocked in.") {
+          sessionStorage.setItem('has_active_shift', "true"); updateClockButtons(); loadDashboardData(); 
+          if(result.status === "success") alert("✅ SUCCESS: " + result.message + "\n\nReminder: You must remain within 150 meters of the residence to clock out later.");
         } else alert("Error: " + result.message);
-      } catch (err) { alert("Network error."); } 
-      finally { btn.innerText = "CLOCK IN"; btn.disabled = false; }
+      } catch (err) { alert("Network error."); } finally { btn.innerText = "CLOCK IN"; btn.disabled = false; }
     }
 
     async function executeClockOut() {
       const btn = document.getElementById('btn-clock-out');
-      const email = sessionStorage.getItem('auth_email');
       btn.innerText = "Writing to Database..."; btn.disabled = true;
-
       try {
         const response = await fetch(API_URL, {
           method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "clockOut", email: email })
+          body: JSON.stringify({ action: "clockOut", email: sessionStorage.getItem('auth_email') })
         });
         const result = await response.json();
-        
-        if (result.status === "success") {
-          sessionStorage.setItem('has_active_shift', "false");
-          updateClockButtons(); 
-          loadDashboardData(); 
-          alert("✅ SUCCESS: " + result.message + "\n\nHave a great day!");
-        } else if (result.message.includes("No active shift found")) {
-          sessionStorage.setItem('has_active_shift', "false"); updateClockButtons();
+        if (result.status === "success" || result.message.includes("No active shift found")) {
+          sessionStorage.setItem('has_active_shift', "false"); updateClockButtons(); loadDashboardData(); 
+          if(result.status === "success") alert("✅ SUCCESS: " + result.message + "\n\nHave a great day!");
         } else alert("Error: " + result.message);
-      } catch (err) { alert("Network error."); } 
-      finally { btn.innerText = "CLOCK OUT"; btn.disabled = false; }
+      } catch (err) { alert("Network error."); } finally { btn.innerText = "CLOCK OUT"; btn.disabled = false; }
     }
 
     async function completeTask(taskId) {
@@ -441,21 +403,18 @@
           body: JSON.stringify({ action: "completeTask", taskId: taskId })
         });
         const result = await response.json();
-        if (result.status === "success") {
-          document.getElementById(`task-${taskId}`).style.display = "none";
-          alert("✅ Task Marked Complete! The family has been notified.");
-        } else { alert("Error: " + result.message); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
+        if (result.status === "success") { document.getElementById(`task-${taskId}`).style.display = "none"; alert("✅ Task Marked Complete! The family has been notified."); } 
+        else { alert("Error: " + result.message); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
       } catch (err) { alert("Network error."); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
     }
 
     async function reportLowSupply() {
       const sel = document.getElementById('low-inventory-select');
-      const itemId = sel.value;
-      if (!itemId) return alert("Please select an item from the list.");
+      if (!sel.value) return alert("Please select an item from the list.");
       try {
         const response = await fetch(API_URL, {
           method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "reportSupply", itemId: itemId })
+          body: JSON.stringify({ action: "reportSupply", itemId: sel.value })
         });
         const result = await response.json();
         if (result.status === "success") { alert("✅ The family has been notified. Thank you!"); sel.value = ""; } 
