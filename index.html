@@ -495,7 +495,7 @@
               let childBadgeHtml = shift.child ? `<div class="child-badge">👧 ${shift.child}</div>` : '';
               
               let mapQuery = shift.location === "Residence" ? encodeURIComponent("Ban Klang Mueang S-Sense Sathorn-Taksin 2, 2 กท.1001 Bang Kho, Chom Thong, Bangkok 10150, Soi 17, 99/472") : encodeURIComponent(shift.location);
-              let locHtml = shift.location ? `<a href="http://googleusercontent.com/maps.google.com/8{mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
+              let locHtml = shift.location ? `<a href="http://googleusercontent.com/maps.google.com/9{mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
               
               schedList.innerHTML += `
                 <div class="shift-card">
@@ -521,8 +521,15 @@
             result.timecards.forEach(tc => {
               const tcDate = new Date(tc.date);
               if (tc.status === "Completed" && tc.clockIn && tc.clockOut) {
-                const start = new Date("1970-01-01T" + String(tc.clockIn).trim() + "Z"); 
-                const end = new Date("1970-01-01T" + String(tc.clockOut).trim() + "Z");
+                let inTime = String(tc.clockIn).trim();
+                let outTime = String(tc.clockOut).trim();
+                
+                if (inTime.split(':').length === 2) inTime += ":00";
+                if (outTime.split(':').length === 2) outTime += ":00";
+
+                const start = new Date("1970-01-01T" + inTime + "Z"); 
+                const end = new Date("1970-01-01T" + outTime + "Z");
+                
                 if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
                   const diffHours = (end - start) / 3600000; 
                   if(diffHours > 0) {
@@ -627,12 +634,17 @@
         }
       }
 
+      let emailHtml = data.drEmail !== "Not provided" ? `<div class="emergency-row"><strong>Doctor Email:</strong> <a href="mailto:${data.drEmail}" style="color:var(--red-text);">${data.drEmail}</a></div>` : '';
+      let addrHtml = data.drAddress !== "Not provided" ? `<div class="emergency-row"><strong>Doctor Address:</strong> ${data.drAddress}</div>` : '';
+
       container.innerHTML = `
         <div class="emergency-card">
           <div class="emergency-header">🚨 Emergency Medical Info</div>
           <div class="emergency-row"><strong>Insurance:</strong> ${insuranceDisplay}</div>
           <div class="emergency-row"><strong>Doctor:</strong> ${data.drName}</div>
           <div class="emergency-row"><strong>Phone:</strong> <a href="tel:${data.drPhone}" style="color:var(--red-text);">${data.drPhone}</a></div>
+          ${emailHtml}
+          ${addrHtml}
           <div class="emergency-row"><strong>Hospital:</strong> ${data.emergencyLoc}</div>
         </div>
         <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:8px; padding:10px;">
