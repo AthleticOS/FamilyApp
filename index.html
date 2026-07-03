@@ -17,6 +17,15 @@
     header .header-text h1 { margin: 0; font-size: 1.3rem; font-weight: 800; line-height: 1.1; }
     header .header-text p { margin: 4px 0 0 0; font-size: 0.8rem; color: #93C5FD; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
+    @keyframes pulse {
+      0% { transform: scale(0.95); opacity: 0.5; }
+      50% { transform: scale(1.2); opacity: 1; }
+      100% { transform: scale(0.95); opacity: 0.5; }
+    }
+    .pulse-dot { height: 8px; width: 8px; border-radius: 50%; display: inline-block; }
+    .pulse-dot.syncing { animation: pulse 1s infinite; background-color: #FDE047; }
+    .pulse-dot.synced { background-color: #10B981; }
+
     #loader { text-align: center; padding: 50px; font-weight: 600; color: var(--text-muted); display: none; }
     #pin-screen { display: none; padding: 40px 20px; text-align: center; }
     .pin-box { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 30px 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); max-width: 350px; margin: 0 auto; }
@@ -79,7 +88,12 @@
         <p id="user-greeting">Identity Verification Required</p>
       </div>
     </div>
-    <button id="btn-signout" onclick="signOut()" style="display:none; background-color:#991B1B; color:#fff; border:none; border-radius:4px; font-size:0.65rem; font-weight:800; padding:6px 10px; cursor:pointer;">SIGN OUT</button>
+    <div class="header-right" style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+      <div id="sync-container" style="display: none; align-items: center; gap: 6px; font-size: 0.65rem; font-weight: 800; color: #93C5FD; text-transform: uppercase;">
+        <span class="pulse-dot" id="sync-dot"></span> <span id="sync-text"></span>
+      </div>
+      <button id="btn-signout" onclick="signOut()" style="display:none; background-color:#991B1B; color:#fff; border:none; border-radius:4px; font-size:0.65rem; font-weight:800; padding:6px 10px; cursor:pointer;">SIGN OUT</button>
+    </div>
   </header>
 
   <div id="loader">Syncing Database...</div>
@@ -165,9 +179,13 @@
           <span style="font-weight: 600;">Sick Days Remaining:</span>
           <span id="sick-balance" style="font-weight: 800; color: var(--accent);">--</span>
         </div>
-        <div style="display: flex; justify-content: space-between;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
           <span style="font-weight: 600;">Personal Days Remaining:</span>
           <span id="personal-balance" style="font-weight: 800; color: var(--accent);">--</span>
+        </div>
+        <div style="display: flex; justify-content: space-between;">
+          <span style="font-weight: 600;">Banked Holidays:</span>
+          <span id="banked-balance" style="font-weight: 800; color: var(--accent);">--</span>
         </div>
       </div>
       <div class="card">
@@ -247,6 +265,21 @@
       }
     }
     
+    function setSyncStatus(isSyncing) {
+      const container = document.getElementById('sync-container');
+      const dot = document.getElementById('sync-dot');
+      const text = document.getElementById('sync-text');
+      container.style.display = 'flex';
+      
+      if (isSyncing) {
+        dot.className = 'pulse-dot syncing';
+        text.innerText = 'Syncing...';
+      } else {
+        dot.className = 'pulse-dot synced';
+        text.innerText = 'Synced';
+      }
+    }
+
     async function verifyPin() {
       const emailInput = document.getElementById('auth-email').value.trim();
       const pinInput = document.getElementById('auth-pin').value.trim();
@@ -266,6 +299,7 @@
     }
 
     async function loadDashboardData() {
+      setSyncStatus(true);
       try {
         const response = await fetch(API_URL, { method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify({ action: "getDashboardData", email: sessionStorage.getItem('auth_email') }) });
         const result = await response.json();
@@ -274,6 +308,8 @@
           // Profile & Contracts
           document.getElementById('sick-balance').innerText = result.sickBalance;
           document.getElementById('personal-balance').innerText = result.personalBalance;
+          document.getElementById('banked-balance').innerText = result.accruedHolidays;
+          
           const cl = document.getElementById('contract-links'); cl.innerHTML = "";
           if (result.contracts.en) cl.innerHTML += `<a href="${result.contracts.en}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 English Contract</a>`;
           if (result.contracts.th) cl.innerHTML += `<a href="${result.contracts.th}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 สัญญาภาษาไทย</a>`;
@@ -351,6 +387,7 @@
           }
         }
       } catch (e) { console.error("Failed to load dashboard data.", e); }
+      setSyncStatus(false);
     }
 
     function renderChildInfo() {
@@ -382,20 +419,20 @@
         });
       }
 
-      // Handle the Insurance Image Formatting
+      // Handle the Insurance Image Formatting (Bypasses new Drive security block)
       let insuranceDisplay = data.insurance;
       if (data.insurance !== "Not provided" && data.insurance.trim() !== "") {
         let imgUrl = data.insurance;
-        // If it's a standard Google Drive link, convert it to a direct image render link
-        if (imgUrl.includes("drive.google.com/file/d/")) {
-          const fileId = imgUrl.split("/d/")[1].split("/")[0];
-          imgUrl = `https://drive.google.com/uc?id=${fileId}`;
+        const driveMatch = imgUrl.match(/(?:file\/d\/|open\?id=|id=)([\w_-]{25,})/i);
+        if (driveMatch) {
+          const fileId = driveMatch[1];
+          imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
         }
         
         if (imgUrl.startsWith("http")) {
           insuranceDisplay = `<br><a href="${data.insurance}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-width: 100%; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
         } else {
-          insuranceDisplay = `<br><span style="font-size: 0.75rem; color: var(--red-text);">*Invalid Image. Please paste a public Google Drive URL in the database.*</span>`;
+          insuranceDisplay = `<br><span style="font-size: 0.75rem; color: var(--red-text);">*Invalid Image URL.*</span>`;
         }
       }
 
