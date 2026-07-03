@@ -38,7 +38,7 @@
     .card-header { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.5px; }
     
     .text-input, .status-select { border: 2px solid var(--border); border-radius: 6px; font-family: 'Plus Jakarta Sans', sans-serif; font-weight: 600; background-color: #fff; width: 100%; padding: 10px; margin-bottom: 15px; box-sizing: border-box; }
-    .btn-submit { width: 100%; background-color: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: background 0.2s; display: block; text-align: center; box-sizing: border-box; }
+    .btn-submit { width: 100%; background-color: var(--primary); color: #fff; border: none; padding: 12px; border-radius: 6px; font-size: 1rem; font-weight: 800; cursor: pointer; transition: background 0.2s; display: block; text-align: center; box-sizing: border-box; text-decoration: none;}
     .btn-submit:disabled { background-color: #94A3B8; cursor: not-allowed; opacity: 0.6; }
     
     .clock-in-btn { background-color: #16A34A; font-size: 1.2rem; padding: 20px; margin-bottom: 10px; }
@@ -56,8 +56,10 @@
     .shift-type { background: #E2E8F0; color: #1E293B; font-size: 0.65rem; padding: 3px 6px; border-radius: 4px; text-transform: uppercase; font-weight: 800;}
     .shift-notes { font-size: 0.8rem; color: var(--text-muted); margin-top: 8px; border-top: 1px dashed var(--border); padding-top: 8px;}
 
+    .task-row { display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; }
+
     .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--card-bg); border-top: 1px solid var(--border); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); display: none; z-index: 200; display: flex;}
-    .nav-item { flex: 1; text-align: center; padding: 15px 0; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); cursor: pointer; text-transform: uppercase; }
+    .nav-item { flex: 1; text-align: center; padding: 15px 0; font-size: 0.65rem; font-weight: 800; color: var(--text-muted); cursor: pointer; text-transform: uppercase; }
     .nav-item.active { color: var(--primary); border-top: 3px solid var(--accent); background-color: #EFF6FF; }
   </style>
 </head>
@@ -134,13 +136,13 @@
     <div id="tab-tasks" class="tab-content">
       <div class="card">
         <div class="card-header">Assigned Tasks</div>
+        <div class="explainer-box">Tap the checkmark when a task is completed to notify the family.</div>
         <div id="tasks-list">
-          <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Tasks will load here soon...</p>
+          <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading tasks...</p>
         </div>
       </div>
       <div class="card">
         <div class="card-header">Log Depleted Supplies</div>
-        <div class="explainer-box">Select an item below if it is running low. This will immediately alert the family.</div>
         <select class="status-select" id="low-inventory-select">
           <option value="">Select Item...</option>
         </select>
@@ -148,12 +150,23 @@
       </div>
     </div>
 
+    <div id="tab-profile" class="tab-content">
+      <div class="card">
+        <div class="card-header">Employment Contracts</div>
+        <p style="font-size: 0.8rem; color: var(--text-muted);">View your official employment agreements and terms.</p>
+        <div id="contract-links">
+          <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading contracts...</p>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <div class="bottom-nav" id="bottom-nav" style="display: none;">
-    <div class="nav-item active" onclick="switchTab('timecard')">Timecard</div>
-    <div class="nav-item" onclick="switchTab('schedule')">Schedule</div>
+    <div class="nav-item active" onclick="switchTab('timecard')">Punch</div>
+    <div class="nav-item" onclick="switchTab('schedule')">Shifts</div>
     <div class="nav-item" onclick="switchTab('tasks')">Tasks</div>
+    <div class="nav-item" id="nav-profile" onclick="switchTab('profile')" style="display:none;">Profile</div>
   </div>
 
   <script>
@@ -232,15 +245,22 @@
         
         if(result.status === "success") {
           
-          // Populate Balances
+          // 1. Populate Balances
           document.getElementById('sick-balance').innerText = result.sickBalance;
           document.getElementById('personal-balance').innerText = result.personalBalance;
 
-          // Render Schedule
+          // 2. Populate Contracts
+          const cl = document.getElementById('contract-links');
+          cl.innerHTML = "";
+          if (result.contracts.en) cl.innerHTML += `<a href="${result.contracts.en}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 English Contract</a>`;
+          if (result.contracts.th) cl.innerHTML += `<a href="${result.contracts.th}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 สัญญาภาษาไทย</a>`;
+          if (result.contracts.la) cl.innerHTML += `<a href="${result.contracts.la}" target="_blank" class="btn-submit" style="margin-bottom:8px; background-color:#1E293B;">📄 ສັນຍาພາສາລາວ</a>`;
+          if (cl.innerHTML === "") cl.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No contracts found.</p>`;
+
+          // 3. Render Schedule
           document.getElementById('metric-shifts').innerText = result.schedule.length;
           const schedList = document.getElementById('schedule-list');
           schedList.innerHTML = "";
-          
           if(result.schedule.length === 0) {
             schedList.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No upcoming shifts found.</p>`;
           } else {
@@ -256,7 +276,7 @@
             });
           }
 
-          // Calculate Hours
+          // 4. Calculate Hours
           let totalHours = 0;
           const oneWeekAgo = new Date();
           oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
@@ -271,6 +291,32 @@
             }
           });
           document.getElementById('metric-hours').innerText = totalHours.toFixed(1);
+
+          // 5. Render Tasks
+          const tList = document.getElementById('tasks-list');
+          tList.innerHTML = "";
+          if (result.tasks.length === 0) {
+            tList.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">You have no pending tasks. Great job!</p>`;
+          } else {
+            result.tasks.forEach(task => {
+              tList.innerHTML += `
+                <div class="task-row" id="task-${task.id}">
+                  <div>
+                    <strong style="display:block; color:var(--primary);">${task.name}</strong>
+                    <span style="font-size:0.7rem; color:var(--accent);">Due: ${task.due}</span>
+                  </div>
+                  <button class="btn-submit btn-small" style="width:auto; padding:8px 12px; background-color:#16A34A;" onclick="completeTask('${task.id}')">✓</button>
+                </div>
+              `;
+            });
+          }
+
+          // 6. Render Supply Dropdown
+          const sSelect = document.getElementById('low-inventory-select');
+          sSelect.innerHTML = '<option value="">Select Item...</option>';
+          result.supplies.forEach(sup => {
+            sSelect.innerHTML += `<option value="${sup.id}">${sup.name}</option>`;
+          });
         }
       } catch (e) { console.error("Failed to load dashboard data.", e); }
     }
@@ -281,19 +327,24 @@
       document.getElementById('bottom-nav').style.display = 'flex';
       document.getElementById('btn-signout').style.display = 'block';
       document.getElementById('user-greeting').innerText = "Welcome, " + sessionStorage.getItem('user_name');
+      
+      const role = String(sessionStorage.getItem('user_role')).toLowerCase();
+      if (role === "nanny") {
+        document.getElementById('nav-profile').style.display = 'block';
+      }
+
       updateClockButtons();
       loadDashboardData();
     }
 
     async function clockIn() {
       const btn = document.getElementById('btn-clock-in');
-      const email = sessionStorage.getItem('auth_email');
       btn.innerText = "Processing..."; btn.disabled = true;
 
       try {
         const response = await fetch(API_URL, {
           method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "clockIn", email: email })
+          body: JSON.stringify({ action: "clockIn", email: sessionStorage.getItem('auth_email') })
         });
         const result = await response.json();
         
@@ -301,8 +352,6 @@
           sessionStorage.setItem('has_active_shift', "true");
           updateClockButtons();
           loadDashboardData(); 
-        } else if (result.message === "You are already clocked in.") {
-          sessionStorage.setItem('has_active_shift', "true"); updateClockButtons();
         } else alert("Error: " + result.message);
       } catch (err) { alert("Network error."); } 
       finally { btn.innerText = "CLOCK IN"; btn.disabled = false; }
@@ -310,13 +359,12 @@
 
     async function clockOut() {
       const btn = document.getElementById('btn-clock-out');
-      const email = sessionStorage.getItem('auth_email');
       btn.innerText = "Processing..."; btn.disabled = true;
 
       try {
         const response = await fetch(API_URL, {
           method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
-          body: JSON.stringify({ action: "clockOut", email: email })
+          body: JSON.stringify({ action: "clockOut", email: sessionStorage.getItem('auth_email') })
         });
         const result = await response.json();
         
@@ -324,14 +372,50 @@
           sessionStorage.setItem('has_active_shift', "false");
           updateClockButtons(); 
           loadDashboardData(); 
-        } else if (result.message.includes("No active shift found")) {
-          sessionStorage.setItem('has_active_shift', "false"); updateClockButtons();
         } else alert("Error: " + result.message);
       } catch (err) { alert("Network error."); } 
       finally { btn.innerText = "CLOCK OUT"; btn.disabled = false; }
     }
 
-    function reportLowSupply() { alert("Low supply reporting will be built next!"); }
+    async function completeTask(taskId) {
+      if(!confirm("Are you sure you want to mark this task as complete?")) return;
+      
+      document.getElementById(`task-${taskId}`).style.opacity = "0.5";
+      
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "completeTask", taskId: taskId })
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+          document.getElementById(`task-${taskId}`).style.display = "none";
+        } else {
+          alert("Error: " + result.message);
+          document.getElementById(`task-${taskId}`).style.opacity = "1";
+        }
+      } catch (err) { alert("Network error."); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
+    }
+
+    async function reportLowSupply() {
+      const sel = document.getElementById('low-inventory-select');
+      const itemId = sel.value;
+      if (!itemId) return alert("Please select an item from the list.");
+      
+      try {
+        const response = await fetch(API_URL, {
+          method: "POST", headers: { "Content-Type": "text/plain;charset=utf-8" },
+          body: JSON.stringify({ action: "reportSupply", itemId: itemId })
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+          alert("The family has been notified. Thank you!");
+          sel.value = "";
+        } else {
+          alert("Error: " + result.message);
+        }
+      } catch (err) { alert("Network error."); }
+    }
 
     document.addEventListener("DOMContentLoaded", () => {
       if (sessionStorage.getItem('auth_active_user') === "true") { launchApp(); } 
