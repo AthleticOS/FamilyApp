@@ -353,13 +353,65 @@
       } catch (e) { console.error("Failed to load dashboard data.", e); }
     }
 
-    function renderChildInfo() {
+   function renderChildInfo() {
       const selectedKid = document.getElementById('child-selector').value;
       const container = document.getElementById('child-data-container');
       if (!selectedKid || !globalKidsData[selectedKid]) {
         container.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">Select a child to view details.</p>`;
         return;
       }
+      
+      const data = globalKidsData[selectedKid];
+      
+      // Handle the Routine HTML
+      let routineHtml = "";
+      if (data.routine.length === 0) {
+        routineHtml = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem; margin-top: 15px;">No routines loaded for ${data.name}.</p>`;
+      } else {
+        data.routine.forEach(r => {
+          let notesStr = r.notes ? `<div class="routine-notes">${r.notes}</div>` : '';
+          routineHtml += `
+            <div class="routine-row">
+              <div class="routine-time">${r.start}<br><span style="color:var(--text-muted); font-weight:600;">${r.end}</span></div>
+              <div class="routine-content">
+                <div class="routine-activity">${r.activity}</div>
+                ${notesStr}
+              </div>
+            </div>
+          `;
+        });
+      }
+
+      // Handle the Insurance Image Formatting
+      let insuranceDisplay = data.insurance;
+      if (data.insurance !== "Not provided" && data.insurance.trim() !== "") {
+        let imgUrl = data.insurance;
+        // If it's a standard Google Drive link, convert it to a direct image render link
+        if (imgUrl.includes("drive.google.com/file/d/")) {
+          const fileId = imgUrl.split("/d/")[1].split("/")[0];
+          imgUrl = `https://drive.google.com/uc?id=${fileId}`;
+        }
+        
+        if (imgUrl.startsWith("http")) {
+          insuranceDisplay = `<br><a href="${data.insurance}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-width: 100%; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
+        } else {
+          insuranceDisplay = `<br><span style="font-size: 0.75rem; color: var(--red-text);">*Invalid Image. Please paste a public Google Drive URL in the database.*</span>`;
+        }
+      }
+
+      container.innerHTML = `
+        <div class="emergency-card">
+          <div class="emergency-header">🚨 Emergency Medical Info</div>
+          <div class="emergency-row"><strong>Insurance:</strong> ${insuranceDisplay}</div>
+          <div class="emergency-row"><strong>Doctor:</strong> ${data.drName}</div>
+          <div class="emergency-row"><strong>Phone:</strong> <a href="tel:${data.drPhone}" style="color:var(--red-text);">${data.drPhone}</a></div>
+          <div class="emergency-row"><strong>Hospital:</strong> ${data.emergencyLoc}</div>
+        </div>
+        <div style="background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px;">
+          ${routineHtml}
+        </div>
+      `;
+    }
       
       const data = globalKidsData[selectedKid];
       
