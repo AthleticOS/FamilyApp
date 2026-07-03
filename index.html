@@ -8,16 +8,16 @@
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;600;700;800&display=swap');
     :root {
       /* Muted Dark Mode Purple Palette */
-      --primary: #5A4B6E;        /* Muted dusk purple for headers and buttons */
-      --accent: #A090B4;         /* Soft desaturated lilac for highlights and text */
-      --bg: #110F15;             /* Deep dark slate with purple undertone */
-      --card-bg: #1A181E;        /* Elevated dark card surface */
-      --text-main: #E8E6EB;      /* Crisp off-white for readability */
-      --text-muted: #8D8896;     /* Muted gray-purple for secondary text */
-      --border: #2F2B36;         /* Subtle dark divider */
-      --red-alert: #2B151A;      /* Dark red background for emergency */
-      --red-border: #5C282F;     /* Muted dark red border */
-      --red-text: #ECA8B1;       /* Soft pink-red for readable alert text */
+      --primary: #5A4B6E;        
+      --accent: #A090B4;         
+      --bg: #110F15;             
+      --card-bg: #1A181E;        
+      --text-main: #E8E6EB;      
+      --text-muted: #8D8896;     
+      --border: #2F2B36;         
+      --red-alert: #2B151A;      
+      --red-border: #5C282F;     
+      --red-text: #ECA8B1;       
     }
 
     body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: var(--bg); color: var(--text-main); margin: 0; padding: 0; padding-bottom: 75px; }
@@ -61,7 +61,7 @@
     .metric-title { font-size: 0.7rem; color: var(--accent); font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
     .metric-value { font-size: 1.6rem; color: var(--text-main); font-weight: 800; }
     
-    /* SCHEDULE CARDS & CALENDAR - DARK MODE ADJUSTED */
+    /* SCHEDULE CARDS & CALENDAR */
     .view-toggle { display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 3px; margin-bottom: 15px; }
     .view-toggle button { flex: 1; border: none; background: transparent; padding: 8px; font-size: 0.8rem; font-weight: 700; border-radius: 4px; color: var(--text-muted); cursor: pointer; }
     .view-toggle button.active { background: #2A2633; color: var(--text-main); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
@@ -91,7 +91,7 @@
 
     .task-row { display: flex; justify-content: space-between; align-items: center; background: #201D25; border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; }
 
-    /* LEAVE REQUEST MODAL - DARK MODE */
+    /* LEAVE REQUEST MODAL */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 300; display: none; align-items: center; justify-content: center; }
     .modal-content { background: var(--card-bg); width: 90%; max-width: 400px; border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid var(--border); }
     .leave-history-row { display: flex; justify-content: space-between; font-size: 0.8rem; padding: 8px 0; border-bottom: 1px solid var(--border); }
@@ -138,18 +138,18 @@
 
   <div class="modal-overlay" id="leave-modal">
     <div class="modal-content">
-      <h2 style="margin-top: 0; font-size: 1.2rem;">Request Time Off</h2>
-      <label style="font-size:0.75rem; font-weight:800; display:block; margin-bottom:4px;">Date Requested</label>
+      <h2 style="margin-top: 0; font-size: 1.2rem; color: var(--text-main);">Request Time Off</h2>
+      <label style="font-size:0.75rem; font-weight:800; display:block; margin-bottom:4px; color:var(--text-muted);">Date Requested</label>
       <input type="date" id="leave-date" class="text-input">
       
-      <label style="font-size:0.75rem; font-weight:800; display:block; margin-bottom:4px;">Type of Leave</label>
+      <label style="font-size:0.75rem; font-weight:800; display:block; margin-bottom:4px; color:var(--text-muted);">Type of Leave</label>
       <select id="leave-type" class="status-select">
         <option value="Sick">Sick Leave</option>
         <option value="Personal">Personal Leave</option>
         <option value="Banked Holiday">Banked Holiday</option>
       </select>
 
-      <label style="font-size:0.75rem; font-weight:800; display:block; margin-bottom:4px;">Reason / Notes</label>
+      <label style="font-size:0.75rem; font-weight:800; display:block; margin-bottom:4px; color:var(--text-muted);">Reason / Notes</label>
       <input type="text" id="leave-reason" class="text-input" placeholder="Optional notes...">
 
       <div style="display: flex; gap: 10px; margin-top: 10px;">
@@ -208,8 +208,7 @@
           <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading schedule...</p>
         </div>
         
-        <div id="schedule-calendar" style="display: none;">
-          </div>
+        <div id="schedule-calendar" style="display: none;"></div>
       </div>
     </div>
 
@@ -495,7 +494,7 @@
               let childBadgeHtml = shift.child ? `<div class="child-badge">👧 ${shift.child}</div>` : '';
               
               let mapQuery = shift.location === "Residence" ? encodeURIComponent("Ban Klang Mueang S-Sense Sathorn-Taksin 2, 2 กท.1001 Bang Kho, Chom Thong, Bangkok 10150, Soi 17, 99/472") : encodeURIComponent(shift.location);
-              let locHtml = shift.location ? `<a href="http://googleusercontent.com/maps.google.com/6{mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
+              let locHtml = shift.location ? `<a href="https://maps.google.com/?q=${mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
               
               schedList.innerHTML += `
                 <div class="shift-card">
@@ -626,7 +625,7 @@
           <div class="emergency-row"><strong>Phone:</strong> <a href="tel:${data.drPhone}" style="color:var(--red-text);">${data.drPhone}</a></div>
           <div class="emergency-row"><strong>Hospital:</strong> ${data.emergencyLoc}</div>
         </div>
-        <div style="background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:10px;">
+        <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:8px; padding:10px;">
           ${routineHtml}
         </div>
       `;
