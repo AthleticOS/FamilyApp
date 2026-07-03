@@ -59,7 +59,7 @@
     .task-row { display: flex; justify-content: space-between; align-items: center; background: #fff; border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; }
 
     .bottom-nav { position: fixed; bottom: 0; width: 100%; background: var(--card-bg); border-top: 1px solid var(--border); box-shadow: 0 -2px 10px rgba(0,0,0,0.05); display: none; z-index: 200; display: flex;}
-    .nav-item { flex: 1; text-align: center; padding: 15px 0; font-size: 0.65rem; font-weight: 800; color: var(--text-muted); cursor: pointer; text-transform: uppercase; }
+    .nav-item { flex: 1; text-align: center; padding: 15px 0; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); cursor: pointer; text-transform: uppercase; }
     .nav-item.active { color: var(--primary); border-top: 3px solid var(--accent); background-color: #EFF6FF; }
   </style>
 </head>
@@ -400,6 +400,7 @@
           sessionStorage.setItem('has_active_shift', "true");
           updateClockButtons();
           loadDashboardData(); 
+          alert("✅ SUCCESS: " + result.message + "\n\nReminder: You must remain within 150 meters of the residence to clock out later.");
         } else if (result.message === "You are already clocked in.") {
           sessionStorage.setItem('has_active_shift', "true"); updateClockButtons();
         } else alert("Error: " + result.message);
@@ -423,6 +424,7 @@
           sessionStorage.setItem('has_active_shift', "false");
           updateClockButtons(); 
           loadDashboardData(); 
+          alert("✅ SUCCESS: " + result.message + "\n\nHave a great day!");
         } else if (result.message.includes("No active shift found")) {
           sessionStorage.setItem('has_active_shift', "false"); updateClockButtons();
         } else alert("Error: " + result.message);
@@ -439,8 +441,10 @@
           body: JSON.stringify({ action: "completeTask", taskId: taskId })
         });
         const result = await response.json();
-        if (result.status === "success") document.getElementById(`task-${taskId}`).style.display = "none";
-        else { alert("Error: " + result.message); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
+        if (result.status === "success") {
+          document.getElementById(`task-${taskId}`).style.display = "none";
+          alert("✅ Task Marked Complete! The family has been notified.");
+        } else { alert("Error: " + result.message); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
       } catch (err) { alert("Network error."); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
     }
 
@@ -454,7 +458,7 @@
           body: JSON.stringify({ action: "reportSupply", itemId: itemId })
         });
         const result = await response.json();
-        if (result.status === "success") { alert("The family has been notified. Thank you!"); sel.value = ""; } 
+        if (result.status === "success") { alert("✅ The family has been notified. Thank you!"); sel.value = ""; } 
         else alert("Error: " + result.message);
       } catch (err) { alert("Network error."); }
     }
