@@ -176,20 +176,12 @@
     <div id="tab-timecard" class="tab-content active">
       <div class="metric-grid">
         <div class="metric-box">
-          <div class="metric-title">Hours (Week)</div>
+          <div class="metric-title">Hours This Week</div>
           <div class="metric-value" id="metric-hours">0.0</div>
         </div>
         <div class="metric-box">
-          <div class="metric-title">Hours (Month)</div>
+          <div class="metric-title">Hours This Month</div>
           <div class="metric-value" id="metric-month-hours">0.0</div>
-        </div>
-        <div class="metric-box" style="border-color: #5C4D1C;">
-          <div class="metric-title" style="color: #FDE047;">OT (Week)</div>
-          <div class="metric-value" id="metric-ot-week">0.0</div>
-        </div>
-        <div class="metric-box" style="border-color: #5C4D1C;">
-          <div class="metric-title" style="color: #FDE047;">OT (Month)</div>
-          <div class="metric-value" id="metric-ot-month">0.0</div>
         </div>
       </div>
 
@@ -503,7 +495,7 @@
               let childBadgeHtml = shift.child ? `<div class="child-badge">👧 ${shift.child}</div>` : '';
               
               let mapQuery = shift.location === "Residence" ? encodeURIComponent("Ban Klang Mueang S-Sense Sathorn-Taksin 2, 2 กท.1001 Bang Kho, Chom Thong, Bangkok 10150, Soi 17, 99/472") : encodeURIComponent(shift.location);
-              let locHtml = shift.location ? `<a href="http://googleusercontent.com/maps.google.com/10{mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
+              let locHtml = shift.location ? `<a href="http://googleusercontent.com/maps.google.com/11{mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
               
               schedList.innerHTML += `
                 <div class="shift-card">
@@ -648,7 +640,9 @@
     function clockOut() { verifyLocationAndExecute(executeClockOut); }
 
     async function executeClockIn() {
-      const btn = document.getElementById('btn-clock-in'); btn.innerText = "Writing..."; btn.disabled = true;
+      const btnIn = document.getElementById('btn-clock-in');
+      const btnOut = document.getElementById('btn-clock-out');
+      btnIn.innerText = "Writing..."; btnIn.disabled = true;
       try {
         const url = `${API_URL}?action=clockIn&email=${encodeURIComponent(sessionStorage.getItem('auth_email'))}`;
         const response = await fetch(url);
@@ -657,11 +651,16 @@
           sessionStorage.setItem('has_active_shift', "true"); updateClockButtons(); loadDashboardData(); 
           if(result.status === "success") alert("✅ SUCCESS: " + result.message + "\n\nReminder: You must remain within 150 meters of the residence to clock out later.");
         } else alert("Error: " + result.message);
-      } catch (err) { alert("Network error."); } finally { btn.innerText = "CLOCK IN"; btn.disabled = false; }
+      } catch (err) { alert("Network error."); } finally { 
+        btnIn.innerText = "CLOCK IN"; btnIn.disabled = false; 
+        btnOut.innerText = "CLOCK OUT"; btnOut.disabled = false; 
+      }
     }
 
     async function executeClockOut() {
-      const btn = document.getElementById('btn-clock-out'); btn.innerText = "Writing..."; btn.disabled = true;
+      const btnIn = document.getElementById('btn-clock-in');
+      const btnOut = document.getElementById('btn-clock-out');
+      btnOut.innerText = "Writing..."; btnOut.disabled = true;
       try {
         const url = `${API_URL}?action=clockOut&email=${encodeURIComponent(sessionStorage.getItem('auth_email'))}`;
         const response = await fetch(url);
@@ -670,7 +669,10 @@
           sessionStorage.setItem('has_active_shift', "false"); updateClockButtons(); loadDashboardData(); 
           if(result.status === "success") alert("✅ SUCCESS: " + result.message + "\n\nHave a great day!");
         } else alert("Error: " + result.message);
-      } catch (err) { alert("Network error."); } finally { btn.innerText = "CLOCK OUT"; btn.disabled = false; }
+      } catch (err) { alert("Network error."); } finally { 
+        btnIn.innerText = "CLOCK IN"; btnIn.disabled = false; 
+        btnOut.innerText = "CLOCK OUT"; btnOut.disabled = false; 
+      }
     }
 
     function closeLeaveModal() {
