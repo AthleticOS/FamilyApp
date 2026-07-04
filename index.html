@@ -61,6 +61,7 @@
     .metric-title { font-size: 0.7rem; color: var(--accent); font-weight: 800; text-transform: uppercase; margin-bottom: 5px; }
     .metric-value { font-size: 1.6rem; color: var(--text-main); font-weight: 800; }
     
+    /* SCHEDULE CARDS & CALENDAR */
     .view-toggle { display: flex; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 3px; margin-bottom: 15px; }
     .view-toggle button { flex: 1; border: none; background: transparent; padding: 8px; font-size: 0.8rem; font-weight: 700; border-radius: 4px; color: var(--text-muted); cursor: pointer; }
     .view-toggle button.active { background: #2A2633; color: var(--text-main); box-shadow: 0 1px 2px rgba(0,0,0,0.2); }
@@ -529,7 +530,7 @@
               let childBadgeHtml = shift.child ? `<div class="child-badge">👧 ${shift.child}</div>` : '';
               
               let mapQuery = shift.location === "Residence" ? encodeURIComponent("Ban Klang Mueang S-Sense Sathorn-Taksin 2, 2 กท.1001 Bang Kho, Chom Thong, Bangkok 10150, Soi 17, 99/472") : encodeURIComponent(shift.location);
-              let locHtml = shift.location ? `<a href="https://www.google.com/maps/search/?api=1&query=${mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
+              let locHtml = shift.location ? `<a href="http://googleusercontent.com/maps.google.com/13{mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
               
               schedList.innerHTML += `
                 <div class="shift-card">
@@ -634,7 +635,7 @@
         if (driveMatch) {
           const fileId = driveMatch[1];
           imgUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
-          insuranceDisplay = `<br><a href="https://drive.google.com/file/d/${fileId}/view" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-width: 100%; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
+          insuranceDisplay = `<br><a href="${insuranceDisplay}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-width: 100%; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
         } else if (imgUrl.startsWith("http")) {
           insuranceDisplay = `<br><a href="${insuranceDisplay}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-width: 100%; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
         } else {
@@ -643,12 +644,7 @@
       }
 
       let emailHtml = data.drEmail !== "Not provided" ? `<div class="emergency-row"><strong>Doctor Email:</strong> <a href="mailto:${data.drEmail}" style="color:var(--red-text);">${data.drEmail}</a></div>` : '';
-      
-      let addrQuery = encodeURIComponent(data.drAddress);
-      let addrHtml = data.drAddress !== "Not provided" ? `<div class="emergency-row"><strong>Doctor Address:</strong> <a href="https://www.google.com/maps/search/?api=1&query=${addrQuery}" target="_blank" style="color:var(--red-text); text-decoration:underline;">${data.drAddress}</a></div>` : '';
-
-      let hospQuery = encodeURIComponent(data.emergencyLoc);
-      let hospHtml = data.emergencyLoc !== "Not provided" ? `<div class="emergency-row"><strong>Hospital:</strong> <a href="https://www.google.com/maps/search/?api=1&query=${hospQuery}" target="_blank" style="color:var(--red-text); text-decoration:underline;">${data.emergencyLoc}</a></div>` : `<div class="emergency-row"><strong>Hospital:</strong> Not provided</div>`;
+      let addrHtml = data.drAddress !== "Not provided" ? `<div class="emergency-row"><strong>Doctor Address:</strong> ${data.drAddress}</div>` : '';
 
       container.innerHTML = `
         <div class="emergency-card">
@@ -658,7 +654,7 @@
           <div class="emergency-row"><strong>Phone:</strong> <a href="tel:${data.drPhone}" style="color:var(--red-text);">${data.drPhone}</a></div>
           ${emailHtml}
           ${addrHtml}
-          ${hospHtml}
+          <div class="emergency-row"><strong>Hospital:</strong> ${data.emergencyLoc}</div>
         </div>
         <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:8px; padding:10px;">
           ${routineHtml}
