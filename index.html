@@ -143,11 +143,15 @@
       <input type="date" id="leave-date" class="text-input">
       
       <label style="font-size:0.75rem; font-weight:800; display:block; margin-bottom:4px; color:var(--text-muted);">Type of Leave</label>
-      <select id="leave-type" class="status-select">
+      <select id="leave-type" class="status-select" onchange="updateLeaveInstructions()">
         <option value="Sick">Sick Leave</option>
         <option value="Personal">Personal Leave</option>
         <option value="Banked Holiday">Banked Holiday</option>
       </select>
+
+      <div id="leave-instructions" style="background-color: #2A2633; border-left: 3px solid var(--accent); padding: 10px; font-size: 0.75rem; color: var(--text-main); margin-bottom: 15px; border-radius: 0 6px 6px 0; line-height: 1.4;">
+        <strong>Sick Leave:</strong> If you are out sick for 3 days or more, a medical certificate is required.
+      </div>
 
       <label style="font-size:0.75rem; font-weight:800; display:block; margin-bottom:4px; color:var(--text-muted);">Reason / Notes</label>
       <input type="text" id="leave-reason" class="text-input" placeholder="Optional notes...">
@@ -176,12 +180,20 @@
     <div id="tab-timecard" class="tab-content active">
       <div class="metric-grid">
         <div class="metric-box">
-          <div class="metric-title">Hours This Week</div>
+          <div class="metric-title">Hours (Week)</div>
           <div class="metric-value" id="metric-hours">0.0</div>
         </div>
         <div class="metric-box">
-          <div class="metric-title">Hours This Month</div>
+          <div class="metric-title">Hours (Month)</div>
           <div class="metric-value" id="metric-month-hours">0.0</div>
+        </div>
+        <div class="metric-box" style="border-color: #5C4D1C;">
+          <div class="metric-title" style="color: #FDE047;">OT (Week)</div>
+          <div class="metric-value" id="metric-ot-week">0.0</div>
+        </div>
+        <div class="metric-box" style="border-color: #5C4D1C;">
+          <div class="metric-title" style="color: #FDE047;">OT (Month)</div>
+          <div class="metric-value" id="metric-ot-month">0.0</div>
         </div>
       </div>
 
@@ -495,7 +507,7 @@
               let childBadgeHtml = shift.child ? `<div class="child-badge">👧 ${shift.child}</div>` : '';
               
               let mapQuery = shift.location === "Residence" ? encodeURIComponent("Ban Klang Mueang S-Sense Sathorn-Taksin 2, 2 กท.1001 Bang Kho, Chom Thong, Bangkok 10150, Soi 17, 99/472") : encodeURIComponent(shift.location);
-              let locHtml = shift.location ? `<a href="http://googleusercontent.com/maps.google.com/11{mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
+              let locHtml = shift.location ? `<a href="http://googleusercontent.com/maps.google.com/12{mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
               
               schedList.innerHTML += `
                 <div class="shift-card">
@@ -675,10 +687,27 @@
       }
     }
 
+    // NEW: Updates the UI instruction box based on dropdown selection
+    function updateLeaveInstructions() {
+      const type = document.getElementById('leave-type').value;
+      const box = document.getElementById('leave-instructions');
+      if (type === 'Sick') {
+        box.innerHTML = "<strong>Sick Leave:</strong> If you are out sick for 3 days or more, a medical certificate is required.";
+      } else if (type === 'Personal') {
+        box.innerHTML = "<strong>Personal Leave:</strong> Please provide an in-depth explanation in the notes below as to why this time off is needed.";
+      } else if (type === 'Banked Holiday') {
+        box.innerHTML = "<strong>Banked Holiday:</strong> Can be used any way you want, but please schedule at least 1 week in advance.";
+      }
+    }
+
     function closeLeaveModal() {
       document.getElementById('leave-modal').style.display = 'none';
       document.getElementById('leave-date').value = '';
       document.getElementById('leave-reason').value = '';
+      
+      // Reset dropdown and text box for the next time it opens
+      document.getElementById('leave-type').value = 'Sick';
+      updateLeaveInstructions();
     }
 
     async function submitLeaveRequest() {
