@@ -635,9 +635,9 @@
         if (driveMatch) {
           const fileId = driveMatch[1];
           imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
-          insuranceDisplay = `<br><a href="${insuranceDisplay}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-width: 100%; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
+          insuranceDisplay = `<br><a href="${insuranceDisplay}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-height: 120px; width: auto; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
         } else if (imgUrl.startsWith("http")) {
-          insuranceDisplay = `<br><a href="${insuranceDisplay}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-width: 100%; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
+          insuranceDisplay = `<br><a href="${insuranceDisplay}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-height: 120px; width: auto; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
         } else {
           insuranceDisplay = `<br><span style="font-size: 0.75rem; color: var(--red-text);">*Invalid Image URL.*</span>`;
         }
