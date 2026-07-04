@@ -176,12 +176,20 @@
     <div id="tab-timecard" class="tab-content active">
       <div class="metric-grid">
         <div class="metric-box">
-          <div class="metric-title">Hours This Week</div>
+          <div class="metric-title">Hours (Week)</div>
           <div class="metric-value" id="metric-hours">0.0</div>
         </div>
         <div class="metric-box">
-          <div class="metric-title">Hours This Month</div>
+          <div class="metric-title">Hours (Month)</div>
           <div class="metric-value" id="metric-month-hours">0.0</div>
+        </div>
+        <div class="metric-box" style="border-color: #5C4D1C;">
+          <div class="metric-title" style="color: #FDE047;">OT (Week)</div>
+          <div class="metric-value" id="metric-ot-week">0.0</div>
+        </div>
+        <div class="metric-box" style="border-color: #5C4D1C;">
+          <div class="metric-title" style="color: #FDE047;">OT (Month)</div>
+          <div class="metric-value" id="metric-ot-month">0.0</div>
         </div>
       </div>
 
@@ -512,42 +520,10 @@
             }
           }
 
-          let totalHours = 0; let monthHours = 0;
-          const now = new Date();
-          const oneWeekAgo = new Date(); oneWeekAgo.setDate(now.getDate() - 7);
-          const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-          
-          if (result.timecards) {
-            result.timecards.forEach(tc => {
-              let tcDate = new Date(tc.date);
-              if (isNaN(tcDate.getTime())) return;
-              
-              if (tc.status.toLowerCase() === "completed" && tc.clockIn && tc.clockOut) {
-                let inParts = String(tc.clockIn).match(/\\d+/g);
-                let outParts = String(tc.clockOut).match(/\\d+/g);
-                
-                if (inParts && outParts && inParts.length >= 2 && outParts.length >= 2) {
-                  let inH = parseInt(inParts[0], 10);
-                  let inM = parseInt(inParts[1], 10);
-                  if (String(tc.clockIn).toLowerCase().includes('pm') && inH < 12) inH += 12;
-                  if (String(tc.clockIn).toLowerCase().includes('am') && inH === 12) inH = 0;
-
-                  let outH = parseInt(outParts[0], 10);
-                  let outM = parseInt(outParts[1], 10);
-                  if (String(tc.clockOut).toLowerCase().includes('pm') && outH < 12) outH += 12;
-                  if (String(tc.clockOut).toLowerCase().includes('am') && outH === 12) outH = 0;
-
-                  let diff = (outH + outM/60) - (inH + inM/60);
-                  if (diff < 0) diff += 24; 
-                  
-                  if (tcDate >= oneWeekAgo) totalHours += diff;
-                  if (tcDate >= firstOfMonth) monthHours += diff;
-                }
-              }
-            });
-          }
-          document.getElementById('metric-hours').innerText = totalHours.toFixed(1);
-          document.getElementById('metric-month-hours').innerText = monthHours.toFixed(1);
+          document.getElementById('metric-hours').innerText = (result.weekHours || 0).toFixed(1);
+          document.getElementById('metric-month-hours').innerText = (result.monthHours || 0).toFixed(1);
+          document.getElementById('metric-ot-week').innerText = (result.weekOT || 0).toFixed(1);
+          document.getElementById('metric-ot-month').innerText = (result.monthOT || 0).toFixed(1);
 
           const tList = document.getElementById('tasks-list'); tList.innerHTML = "";
           if (!result.tasks || result.tasks.length === 0) {
