@@ -162,6 +162,12 @@
         <option value="Banked Holiday">Banked Holiday</option>
       </select>
 
+      <label style="font-size:0.75rem; font-weight:800; display:block; margin-bottom:4px; color:var(--text-muted);">Duration</label>
+      <select id="leave-duration" class="status-select">
+        <option value="Full Day">Full Day</option>
+        <option value="Half Day">Half Day</option>
+      </select>
+
       <div id="leave-instructions" style="background-color: #2A2633; border-left: 3px solid var(--accent); padding: 10px; font-size: 0.75rem; color: var(--text-main); margin-bottom: 15px; border-radius: 0 6px 6px 0; line-height: 1.4;">
         <strong>Sick Leave:</strong> If you are out sick for 3 days or more, a medical certificate is required.
       </div>
@@ -328,7 +334,7 @@
     
     let globalKidsData = {};
     let globalAllShifts = [];
-    let globalSupplies = []; // NEW: Storing for inventory audit
+    let globalSupplies = []; 
     let currentCalMonth = new Date(); 
 
     function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
@@ -526,9 +532,11 @@
                 if(req.status === "Approved") sClass = "status-approved";
                 if(req.status === "Denied" || req.status === "Declined") sClass = "status-denied";
                 
+                let durBadge = req.duration === "Half Day" ? " (Half)" : "";
+                
                 leaveList.innerHTML += `
                   <div class="leave-history-row">
-                    <div><strong style="color:var(--text-main);">${req.dateStr}</strong><br><span style="color:var(--text-muted); font-size:0.7rem;">${req.type}</span></div>
+                    <div><strong style="color:var(--text-main);">${req.dateStr}</strong><br><span style="color:var(--text-muted); font-size:0.7rem;">${req.type}${durBadge}</span></div>
                     <div><span class="leave-status ${sClass}">${req.status}</span></div>
                   </div>
                 `;
@@ -587,14 +595,12 @@
             });
           }
 
-          // NEW INVENTORY PARSING & GENERATION
           globalSupplies = result.supplies || [];
           const invContainer = document.getElementById('inventory-audit-container');
           
           if (globalSupplies.length === 0) {
              invContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">No inventory data found.</p>';
           } else {
-             // Group by Category
              let grouped = {};
              globalSupplies.forEach(sup => {
                  let cat = sup.category || "Uncategorized";
@@ -656,7 +662,6 @@
       setSyncStatus(false);
     }
 
-    // NEW: Inventory Functions
     function toggleCategory(catId) {
         const content = document.getElementById('cat-' + catId);
         const icon = document.getElementById('icon-' + catId);
@@ -701,7 +706,7 @@
             
             if (result.status === "success") { 
                 alert("✅ Inventory successfully audited!"); 
-                loadDashboardData(); // Refreshes and resets the form!
+                loadDashboardData(); 
             } else { 
                 alert("Error: " + result.message); 
             }
@@ -859,6 +864,7 @@
       const lDate = document.getElementById('leave-date').value;
       const lType = document.getElementById('leave-type').value;
       const lReason = document.getElementById('leave-reason').value;
+      const lDuration = document.getElementById('leave-duration').value; // NEW
       
       if (!lDate) return alert("Please select a date.");
       
@@ -866,7 +872,7 @@
       btn.innerText = "Submitting..."; btn.disabled = true;
       
       try {
-        const url = `${API_URL}?action=requestLeave&email=${encodeURIComponent(sessionStorage.getItem('auth_email'))}&dateReq=${encodeURIComponent(lDate)}&type=${encodeURIComponent(lType)}&reason=${encodeURIComponent(lReason)}`;
+        const url = `${API_URL}?action=requestLeave&email=${encodeURIComponent(sessionStorage.getItem('auth_email'))}&dateReq=${encodeURIComponent(lDate)}&type=${encodeURIComponent(lType)}&reason=${encodeURIComponent(lReason)}&duration=${encodeURIComponent(lDuration)}`;
         const response = await fetch(url);
         const result = await response.json();
         if (result.status === "success") { 
@@ -887,19 +893,6 @@
         if (result.status === "success") { document.getElementById(`task-${taskId}`).style.display = "none"; alert("✅ Task Marked Complete! The family has been notified."); } 
         else { alert("Error: " + result.message); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
       } catch (err) { alert("Network error."); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
-    }
-
-    // Retained just in case, but deprecated from UI in favor of syncInventory
-    async function reportLowSupply() {
-      const sel = document.getElementById('low-inventory-select');
-      if (!sel.value) return alert("Please select an item from the list.");
-      try {
-        const url = `${API_URL}?action=reportSupply&itemId=${encodeURIComponent(sel.value)}`;
-        const response = await fetch(url);
-        const result = await response.json();
-        if (result.status === "success") { alert("✅ The family has been notified. Thank you!"); sel.value = ""; } 
-        else alert("Error: " + result.message);
-      } catch (err) { alert("Network error."); }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
