@@ -91,6 +91,19 @@
 
     .task-row { display: flex; justify-content: space-between; align-items: center; background: #201D25; border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; }
 
+    /* INVENTORY AUDIT STYLES */
+    .category-header { background: #2A2633; padding: 10px 15px; border-radius: 6px; font-weight: 800; display: flex; justify-content: space-between; cursor: pointer; margin-bottom: 8px; color: var(--accent); }
+    .category-content { display: none; padding-left: 10px; padding-right: 10px; margin-bottom: 15px;}
+    .category-content.open { display: block; }
+    .inventory-item { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding: 12px 0; }
+    .inventory-item:last-child { border-bottom: none; }
+    .inv-name { font-size: 0.85rem; color: var(--text-main); font-weight: 600; }
+    .inv-unit { font-size: 0.7rem; color: var(--text-muted); }
+    .inv-controls { display: flex; align-items: center; gap: 12px; }
+    .btn-inv { background: var(--border); color: white; border: none; width: 32px; height: 32px; border-radius: 6px; font-size: 1.2rem; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.1s;}
+    .btn-inv:active { background: var(--accent); }
+    .inv-qty { font-size: 1rem; font-weight: 800; width: 30px; text-align: center; }
+
     /* LEAVE REQUEST MODAL */
     .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 300; display: none; align-items: center; justify-content: center; }
     .modal-content { background: var(--card-bg); width: 90%; max-width: 400px; border-radius: 12px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 1px solid var(--border); }
@@ -244,12 +257,16 @@
           <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading tasks...</p>
         </div>
       </div>
+      
       <div class="card">
-        <div class="card-header">Log Depleted Supplies</div>
-        <select class="status-select" id="low-inventory-select">
-          <option value="">Select Item...</option>
-        </select>
-        <button class="btn-submit" onclick="reportLowSupply()">Report Low Stock</button>
+        <div class="card-header">Audit Inventory</div>
+        <div class="explainer-box">Tap the categories below to expand. Adjust counts to match what is physically in the house, then tap Sync.</div>
+        
+        <div id="inventory-audit-container">
+          <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading inventory...</p>
+        </div>
+        
+        <button class="btn-submit" id="btn-sync-inv" onclick="syncInventory()" style="margin-top: 15px;">Sync Inventory</button>
       </div>
     </div>
 
@@ -311,6 +328,7 @@
     
     let globalKidsData = {};
     let globalAllShifts = [];
+    let globalSupplies = []; // NEW: Storing for inventory audit
     let currentCalMonth = new Date(); 
 
     function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
@@ -569,10 +587,49 @@
             });
           }
 
-          const sSelect = document.getElementById('low-inventory-select');
-          sSelect.innerHTML = '<option value="">Select Item...</option>';
-          if (result.supplies) {
-            result.supplies.forEach(sup => { sSelect.innerHTML += `<option value="${sup.id}">${sup.name}</option>`; });
+          // NEW INVENTORY PARSING & GENERATION
+          globalSupplies = result.supplies || [];
+          const invContainer = document.getElementById('inventory-audit-container');
+          
+          if (globalSupplies.length === 0) {
+             invContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">No inventory data found.</p>';
+          } else {
+             // Group by Category
+             let grouped = {};
+             globalSupplies.forEach(sup => {
+                 let cat = sup.category || "Uncategorized";
+                 if (!grouped[cat]) grouped[cat] = [];
+                 grouped[cat].push(sup);
+             });
+
+             let invHtml = "";
+             for (const cat in grouped) {
+                 invHtml += `
+                    <div class="category-header" onclick="toggleCategory('${cat.replace(/\s+/g, '')}')">
+                        <span>📦 ${cat}</span>
+                        <span id="icon-${cat.replace(/\s+/g, '')}">▼</span>
+                    </div>
+                    <div class="category-content" id="cat-${cat.replace(/\s+/g, '')}">
+                 `;
+                 
+                 grouped[cat].forEach(item => {
+                     invHtml += `
+                        <div class="inventory-item">
+                            <div>
+                                <div class="inv-name">${item.name}</div>
+                                <div class="inv-unit">${item.unit}</div>
+                            </div>
+                            <div class="inv-controls">
+                                <button class="btn-inv" onclick="changeQty('${item.id}', -1)">−</button>
+                                <div class="inv-qty" id="qty-${item.id}">${item.stock}</div>
+                                <button class="btn-inv" onclick="changeQty('${item.id}', 1)">+</button>
+                            </div>
+                        </div>
+                     `;
+                 });
+                 invHtml += `</div>`;
+             }
+             invContainer.innerHTML = invHtml;
           }
 
           globalKidsData = result.kidsData || {};
@@ -597,6 +654,62 @@
         alert("Dashboard Error: " + e.message);
       }
       setSyncStatus(false);
+    }
+
+    // NEW: Inventory Functions
+    function toggleCategory(catId) {
+        const content = document.getElementById('cat-' + catId);
+        const icon = document.getElementById('icon-' + catId);
+        if (content.classList.contains('open')) {
+            content.classList.remove('open');
+            icon.innerText = '▼';
+        } else {
+            content.classList.add('open');
+            icon.innerText = '▲';
+        }
+    }
+
+    function changeQty(id, delta) {
+        let el = document.getElementById('qty-' + id);
+        let current = parseInt(el.innerText) || 0;
+        let newVal = current + delta;
+        if(newVal < 0) newVal = 0;
+        el.innerText = newVal;
+    }
+
+    async function syncInventory() {
+        let updates = {};
+        let hasChanges = false;
+        
+        globalSupplies.forEach(sup => {
+            let currentQty = parseInt(document.getElementById('qty-' + sup.id).innerText);
+            if (currentQty !== sup.stock) {
+                updates[sup.id] = currentQty;
+                hasChanges = true;
+            }
+        });
+        
+        if (!hasChanges) return alert("No changes detected.");
+        
+        const btn = document.getElementById('btn-sync-inv');
+        btn.innerText = "Syncing..."; btn.disabled = true;
+        
+        try {
+            const url = `${API_URL}?action=syncInventory&data=${encodeURIComponent(JSON.stringify(updates))}`;
+            const response = await fetch(url);
+            const result = await response.json();
+            
+            if (result.status === "success") { 
+                alert("✅ Inventory successfully audited!"); 
+                loadDashboardData(); // Refreshes and resets the form!
+            } else { 
+                alert("Error: " + result.message); 
+            }
+        } catch (err) { 
+            alert("Network error communicating with the database."); 
+        } finally { 
+            btn.innerText = "Sync Inventory"; btn.disabled = false; 
+        }
     }
 
     function renderChildInfo() {
@@ -634,8 +747,8 @@
         
         if (driveMatch) {
           const fileId = driveMatch[1];
-          imgUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w1000`;
-          insuranceDisplay = `<br><a href="${insuranceDisplay}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-height: 120px; width: auto; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
+          imgUrl = `https://lh3.googleusercontent.com/d/$${fileId}`;
+          insuranceDisplay = `<br><a href="https://drive.google.com/file/d/${fileId}/view" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-height: 120px; width: auto; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
         } else if (imgUrl.startsWith("http")) {
           insuranceDisplay = `<br><a href="${insuranceDisplay}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-height: 120px; width: auto; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
         } else {
@@ -651,7 +764,6 @@
       let hospQuery = encodeURIComponent(data.emergencyLoc);
       let hospHtml = data.emergencyLoc !== "Not provided" ? `<div class="emergency-row"><strong>Hospital:</strong> <a href="https://maps.google.com/?q=${hospQuery}" target="_blank" style="color:var(--red-text); text-decoration:underline;">${data.emergencyLoc}</a></div>` : `<div class="emergency-row"><strong>Hospital:</strong> Not provided</div>`;
 
-      // Swapped structure: Routine first (with heavy header), Emergency info second
       container.innerHTML = `
         <div style="margin-bottom: 20px;">
           <div style="background-color: var(--primary); color: #F3F2F4; padding: 12px 15px; border-radius: 8px; font-weight: 800; font-size: 1.05rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; border-bottom: 3px solid #433753;">
@@ -777,6 +889,7 @@
       } catch (err) { alert("Network error."); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
     }
 
+    // Retained just in case, but deprecated from UI in favor of syncInventory
     async function reportLowSupply() {
       const sel = document.getElementById('low-inventory-select');
       if (!sel.value) return alert("Please select an item from the list.");
