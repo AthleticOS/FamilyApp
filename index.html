@@ -752,7 +752,7 @@
         
         if (driveMatch) {
           const fileId = driveMatch[1];
-          imgUrl = `https://lh3.googleusercontent.com/d/$${fileId}`;
+          imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
           insuranceDisplay = `<br><a href="https://drive.google.com/file/d/${fileId}/view" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-height: 120px; width: auto; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
         } else if (imgUrl.startsWith("http")) {
           insuranceDisplay = `<br><a href="${insuranceDisplay}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-height: 120px; width: auto; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
@@ -864,7 +864,7 @@
       const lDate = document.getElementById('leave-date').value;
       const lType = document.getElementById('leave-type').value;
       const lReason = document.getElementById('leave-reason').value;
-      const lDuration = document.getElementById('leave-duration').value; // NEW
+      const lDuration = document.getElementById('leave-duration').value; 
       
       if (!lDate) return alert("Please select a date.");
       
