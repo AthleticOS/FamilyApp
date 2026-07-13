@@ -89,7 +89,7 @@
     .legend-item { display: flex; align-items: center; gap: 4px; }
     .legend-color { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.1); }
 
-    .task-row { display: flex; justify-content: space-between; align-items: center; background: #201D25; border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; border-left: 3px solid #10B981;}
+    .task-row { display: flex; justify-content: space-between; align-items: center; background: #201D25; border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; }
 
     /* INVENTORY AUDIT STYLES */
     .category-header { background: #2A2633; padding: 10px 15px; border-radius: 6px; font-weight: 800; display: flex; justify-content: space-between; cursor: pointer; margin-bottom: 8px; color: var(--accent); }
@@ -113,18 +113,14 @@
     .status-approved { background: #193122; color: #86EFAC; border: 1px solid #274E35;}
     .status-denied { background: #3B1515; color: #FCA5A5; border: 1px solid #5C282F;}
 
-    /* UNIFIED PLAN STYLES */
-    .emergency-card { background-color: var(--red-alert); border: 2px solid var(--red-border); border-radius: 8px; padding: 12px; margin-bottom: 15px; display: none;}
-    .emergency-header { color: var(--red-text); font-weight: 800; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;}
+    /* KIOSK / KIDS STYLES */
+    .emergency-card { background-color: var(--red-alert); border: 2px solid var(--red-border); border-radius: 8px; padding: 12px; margin-bottom: 15px; }
+    .emergency-header { color: var(--red-text); font-weight: 800; font-size: 0.85rem; text-transform: uppercase; display: flex; align-items: center; }
     .emergency-row { font-size: 0.85rem; margin-bottom: 5px; color: #D78A94;}
     .emergency-row strong { font-weight: 700; color: var(--red-text); }
-    .routine-row { display: flex; background: #2A2633; border: 1px solid #433753; border-radius: 6px; padding: 10px; margin-bottom: 8px; border-left: 3px solid var(--accent); align-items: center;}
-    .routine-time { width: 80px; font-weight: 800; font-size: 0.8rem; color: var(--text-main); flex-shrink: 0; }
-    .routine-content { flex-grow: 1; }
-    .routine-activity { font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 2px; }
-    .routine-notes { font-size: 0.75rem; color: #D5CDE3; line-height: 1.3;}
+    .routine-notes { font-size: 0.8rem; color: var(--text-muted); }
 
-    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #141217; border-top: 1px solid var(--border); box-shadow: 0 -2px 15px rgba(0,0,0,0.5); display: none; z-index: 200; display: flex;}
+    .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #141217; border-top: 1px solid var(--border); box-shadow: 0 -2px 15px rgba(0,0,0,0.5); display: none; z-index: 200; flex;}
     .nav-item { flex: 1; text-align: center; padding: 15px 0; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); cursor: pointer; text-transform: uppercase; transition: background 0.2s; }
     .nav-item.active { color: var(--text-main); border-top: 3px solid var(--accent); background-color: #201D25; }
   </style>
@@ -148,6 +144,7 @@
 
   <div id="loader">Syncing Database...</div>
 
+  <!-- LEAVE REQUEST MODAL -->
   <div class="modal-overlay" id="leave-modal">
     <div class="modal-content">
       <h2 style="margin-top: 0; font-size: 1.2rem; color: var(--text-main);">Request Time Off</h2>
@@ -195,6 +192,7 @@
 
   <div class="container" id="app-container">
     
+    <!-- TIMECLOCK TAB -->
     <div id="tab-timecard" class="tab-content active">
       <div class="metric-grid">
         <div class="metric-box">
@@ -225,6 +223,7 @@
       </div>
     </div>
 
+    <!-- SCHEDULE TAB -->
     <div id="tab-schedule" class="tab-content">
       <div class="card">
         <div class="card-header">Your Upcoming Schedule</div>
@@ -242,37 +241,21 @@
       </div>
     </div>
 
-    <!-- UNIFIED DAILY PLAN TAB -->
+    <!-- DAILY PLAN & ROUTINES TAB -->
     <div id="tab-plan" class="tab-content">
-      <div class="card" style="margin-bottom: 10px; padding: 10px 15px;">
-        <select class="status-select" id="child-selector" onchange="renderPlan()" style="margin-bottom: 0;">
+      <div class="card">
+        <div class="card-header">Daily Plan & Routines</div>
+        <select class="status-select" id="child-selector" onchange="renderDailyPlan()">
           <option value="">Loading kids...</option>
         </select>
-      </div>
-
-      <button id="btn-emergency-toggle" onclick="toggleEmergency()" style="width: 100%; background-color: var(--red-border); color: #FFF; border: none; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 800; cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-        <span>🚨 Show Emergency & Medical Info</span> <span>▼</span>
-      </button>
-
-      <div class="emergency-card" id="emergency-container">
-         <p style="text-align: center; color: var(--red-text); font-size: 0.85rem; margin:0;">Loading medical data...</p>
-      </div>
-
-      <div class="card">
-        <div class="card-header" style="color: #86EFAC;">📌 Anytime Chores</div>
-        <div class="explainer-box">Tasks to complete whenever you have a free moment today.</div>
-        <div id="anytime-tasks-list">
-          <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">No anytime tasks today!</p>
+        <div id="daily-plan-container">
+           <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Select a child above to view itinerary.</p>
         </div>
       </div>
-
-      <div class="card">
-        <div class="card-header" style="color: var(--accent);">📅 Today's Itinerary</div>
-        <div id="timeline-list">
-           <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Select a child to view timeline.</p>
-        </div>
-      </div>
-      
+    </div>
+    
+    <!-- INVENTORY TAB -->
+    <div id="tab-inventory" class="tab-content">
       <div class="card">
         <div class="card-header">Audit Inventory</div>
         <div class="explainer-box">Tap the categories below to expand. Adjust counts to match what is physically in the house, then tap Sync.</div>
@@ -285,6 +268,7 @@
       </div>
     </div>
 
+    <!-- PROFILE TAB -->
     <div id="tab-profile" class="tab-content">
       <div class="card">
         <div class="card-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -333,6 +317,7 @@
     <div class="nav-item active" onclick="switchTab('timecard')">Punch</div>
     <div class="nav-item" onclick="switchTab('schedule')">Shifts</div>
     <div class="nav-item" onclick="switchTab('plan')">Plan</div>
+    <div class="nav-item" onclick="switchTab('inventory')">Inv</div>
     <div class="nav-item" id="nav-profile" onclick="switchTab('profile')">Profile</div>
   </div>
 
@@ -341,9 +326,9 @@
     const HOME_LAT = 13.710583; const HOME_LNG = 100.463750; const ALLOWED_RADIUS_METERS = 150;
     
     let globalKidsData = {};
+    let globalTasks = [];
     let globalAllShifts = [];
     let globalSupplies = []; 
-    let globalTasks = [];
     let currentCalMonth = new Date(); 
 
     function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
@@ -402,18 +387,6 @@
         document.getElementById('schedule-calendar').style.display = 'block';
         renderCalendar();
       }
-    }
-
-    function toggleEmergency() {
-        const ec = document.getElementById('emergency-container');
-        const btn = document.getElementById('btn-emergency-toggle');
-        if (ec.style.display === 'block') {
-            ec.style.display = 'none';
-            btn.innerHTML = '<span>🚨 Show Emergency & Medical Info</span> <span>▼</span>';
-        } else {
-            ec.style.display = 'block';
-            btn.innerHTML = '<span>🚨 Hide Emergency & Medical Info</span> <span>▲</span>';
-        }
     }
 
     function changeMonth(offset) {
@@ -600,7 +573,7 @@
           document.getElementById('metric-ot-month').innerText = (result.monthOT || 0).toFixed(1);
 
           globalTasks = result.tasks || [];
-
+          
           globalSupplies = result.supplies || [];
           const invContainer = document.getElementById('inventory-audit-container');
           
@@ -654,9 +627,9 @@
           }
           if (firstKid) {
             kidSelector.value = firstKid;
-            renderPlan();
+            renderDailyPlan();
           } else {
-             document.getElementById('timeline-list').innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No child profiles found.</p>`;
+             document.getElementById('daily-plan-container').innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No child profiles found.</p>`;
           }
         } else {
           alert("Dashboard Error: " + (result.message || "Unknown API error"));
@@ -723,109 +696,108 @@
         }
     }
 
-    function renderPlan() {
+    function renderDailyPlan() {
       const selectedKid = document.getElementById('child-selector').value;
-      const ec = document.getElementById('emergency-container');
-      const anyList = document.getElementById('anytime-tasks-list');
-      const timeList = document.getElementById('timeline-list');
-
-      let anytimeHtml = "";
-      let timelineItems = [];
-
-      // Sort tasks into Anytime vs Timed
-      globalTasks.forEach(task => {
-          let notesHtml = task.notes ? `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; line-height:1.3;">${task.notes}</div>` : '';
-          let taskHtml = `
-            <div class="task-row" id="task-${task.id}">
-              <div style="flex-grow: 1; padding-right: 15px;">
-                <strong style="display:block; color:var(--text-main);">${task.name}</strong>
-                ${notesHtml}
-              </div>
-              <button class="btn-submit btn-small" style="width:auto; padding:8px 12px; background-color:#15803D; flex-shrink: 0; align-self: center;" onclick="completeTask('${task.id}')">✓</button>
-            </div>
-          `;
-
-          // If the task has no specific time (12:00 AM or 0 timestamp) it goes to anytime bucket
-          if (task.due.includes("12:00 AM") || task.due === "No Date" || task.timestamp === 0) {
-              anytimeHtml += taskHtml;
-          } else {
-              timelineItems.push({
-                  timeSort: task.timestamp,
-                  timeStr: new Date(task.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-                  type: 'task',
-                  html: taskHtml
-              });
-          }
-      });
-
-      if(anytimeHtml === "") anytimeHtml = `<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">No anytime chores today!</p>`;
-      anyList.innerHTML = anytimeHtml;
-
+      const container = document.getElementById('daily-plan-container');
+      
       if (!selectedKid || !globalKidsData[selectedKid]) {
-        timeList.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">Select a child to view timeline.</p>`;
-        ec.innerHTML = "";
+        container.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">Select a child to view details.</p>`;
         return;
       }
-
+      
       const data = globalKidsData[selectedKid];
-
-      // Add Routines to Timeline
-      if (data.routine && data.routine.length > 0) {
+      let timeline = [];
+      
+      // Combine Routines
+      if (data.routine) {
         data.routine.forEach(r => {
-          let notesStr = r.notes ? `<div class="routine-notes">${r.notes}</div>` : '';
-          let routineHtml = `
-            <div class="routine-row">
-              <div class="routine-time">${r.start}<br><span style="color:var(--text-muted); font-weight:600;">${r.end}</span></div>
-              <div class="routine-content">
-                <div class="routine-activity">${r.activity}</div>
+          timeline.push({ type: 'routine', timeStr: `${r.start} - ${r.end}`, timeSort: r.timeSort, title: r.activity, notes: r.notes });
+        });
+      }
+      
+      // Separate Flexible vs Timed Tasks
+      let anytimeTasks = [];
+      globalTasks.forEach(t => {
+        if (t.due === "No Date" || t.due.includes("12:00 AM") || t.due.includes("00:00")) {
+          anytimeTasks.push(t);
+        } else {
+          // Extracts the time part (e.g., "10:00 AM" from "Jul 13, 10:00 AM")
+          let timeParts = t.due.split(', ');
+          let timeDisplay = timeParts.length > 1 ? timeParts[1] : t.due;
+          timeline.push({ type: 'task', timeStr: timeDisplay, timeSort: t.timestamp, title: t.name, notes: t.notes, id: t.id });
+        }
+      });
+      
+      // Sort Chronologically
+      timeline.sort((a,b) => a.timeSort - b.timeSort);
+      
+      // Build Flexible Bucket HTML
+      let anytimeHtml = "";
+      if (anytimeTasks.length > 0) {
+        anytimeHtml += `<div style="margin-bottom: 25px;">
+          <div style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">📌 Flexible / Anytime Chores</div>`;
+        
+        anytimeTasks.forEach(t => {
+          let notesStr = t.notes ? `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; line-height:1.3;">${t.notes}</div>` : '';
+          anytimeHtml += `
+            <div class="task-row" id="task-${t.id}">
+              <div style="flex-grow: 1; padding-right: 15px;">
+                <strong style="display:block; color:var(--text-main);">${t.title}</strong>
                 ${notesStr}
               </div>
+              <button class="btn-submit btn-small" style="width:auto; padding:8px 12px; background-color:#15803D; flex-shrink: 0; align-self: center;" onclick="completeTask('${t.id}')">✓</button>
             </div>
           `;
-          timelineItems.push({
-              timeSort: r.timeSort,
-              timeStr: r.start,
-              type: 'routine',
-              html: routineHtml
-          });
+        });
+        anytimeHtml += `</div>`;
+      }
+      
+      // Build Timeline HTML
+      let timelineHtml = "";
+      if (timeline.length === 0) {
+        timelineHtml = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No routines or tasks scheduled today.</p>`;
+      } else {
+        timelineHtml += `<div style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">🕒 Chronological Itinerary</div>`;
+        
+        timeline.forEach(item => {
+          let notesStr = item.notes ? `<div class="routine-notes" style="margin-top:4px;">${item.notes}</div>` : '';
+          
+          if (item.type === 'routine') {
+            timelineHtml += `
+              <div style="display: flex; margin-bottom: 10px; background:var(--card-bg); border:1px solid var(--border); border-left: 4px solid var(--primary); border-radius: 6px; padding: 10px;">
+                <div style="width: 75px; font-weight: 800; font-size: 0.75rem; color: var(--accent); flex-shrink: 0;">${item.timeStr.replace(' - ', '<br>')}</div>
+                <div style="flex-grow: 1;">
+                  <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">${item.title}</div>
+                  ${notesStr}
+                </div>
+              </div>
+            `;
+          } else {
+            timelineHtml += `
+              <div class="task-row" id="task-${item.id}" style="border-left: 4px solid #10B981; margin-bottom: 10px;">
+                <div style="width: 75px; font-weight: 800; font-size: 0.75rem; color: #10B981; flex-shrink: 0; margin-right: 5px;">${item.timeStr}</div>
+                <div style="flex-grow: 1; padding-right: 10px;">
+                  <strong style="display:block; color:var(--text-main); font-size: 0.95rem;">${item.title}</strong>
+                  ${notesStr}
+                </div>
+                <button class="btn-submit btn-small" style="width:auto; padding:8px 12px; background-color:#15803D; flex-shrink: 0; align-self: center;" onclick="completeTask('${item.id}')">✓</button>
+              </div>
+            `;
+          }
         });
       }
 
-      // Sort and Render Timeline
-      timelineItems.sort((a, b) => a.timeSort - b.timeSort);
-      
-      let finalTimelineHtml = "";
-      if (timelineItems.length === 0) {
-          finalTimelineHtml = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No scheduled events or routines today.</p>`;
-      } else {
-          timelineItems.forEach(item => {
-              if (item.type === 'task') {
-                 // Wrap task with time indicator to match routine layout visually
-                 finalTimelineHtml += `
-                    <div style="display:flex; align-items:center; margin-bottom: 8px;">
-                       <div style="width: 80px; font-weight: 800; font-size: 0.8rem; color: #10B981; flex-shrink: 0; padding-left:10px;">${item.timeStr}</div>
-                       <div style="flex-grow:1;">${item.html}</div>
-                    </div>
-                 `;
-              } else {
-                 finalTimelineHtml += item.html;
-              }
-          });
-      }
-      timeList.innerHTML = finalTimelineHtml;
-
-      // Render Emergency Data
+      // Build Collapsible Emergency Block
       let insuranceDisplay = String(data.insurance || "");
       if (insuranceDisplay !== "Not provided" && insuranceDisplay.trim() !== "") {
         let imgUrl = insuranceDisplay;
         const driveMatch = imgUrl.match(/(?:file\/d\/|open\?id=|id=)([\w_-]{25,})/i);
         if (driveMatch) {
-          imgUrl = `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
-          insuranceDisplay = `<br><a href="https://drive.google.com/file/d/${driveMatch[1]}/view" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-height: 120px; width: auto; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
+          const fileId = driveMatch[1];
+          imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
+          insuranceDisplay = `<br><a href="https://drive.google.com/file/d/${fileId}/view" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-height: 120px; width: auto; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
         } else if (imgUrl.startsWith("http")) {
           insuranceDisplay = `<br><a href="${insuranceDisplay}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-height: 120px; width: auto; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
-        } else {
-          insuranceDisplay = `<br><span style="font-size: 0.75rem; color: var(--red-text);">*Invalid Image URL.*</span>`;
         }
       }
 
@@ -835,13 +807,21 @@
       let hospQuery = encodeURIComponent(data.emergencyLoc);
       let hospHtml = data.emergencyLoc !== "Not provided" ? `<div class="emergency-row"><strong>Hospital:</strong> <a href="https://maps.google.com/?q=${hospQuery}" target="_blank" style="color:var(--red-text); text-decoration:underline;">${data.emergencyLoc}</a></div>` : `<div class="emergency-row"><strong>Hospital:</strong> Not provided</div>`;
 
-      ec.innerHTML = `
-        <div class="emergency-row"><strong>Insurance:</strong> ${insuranceDisplay}</div>
-        <div class="emergency-row"><strong>Doctor:</strong> ${data.drName}</div>
-        <div class="emergency-row"><strong>Phone:</strong> <a href="tel:${data.drPhone}" style="color:var(--red-text);">${data.drPhone}</a></div>
-        ${emailHtml}
-        ${addrHtml}
-        ${hospHtml}
+      container.innerHTML = `
+        <details class="emergency-card" style="cursor: pointer; margin-bottom: 20px;">
+          <summary class="emergency-header" style="outline: none;">🚨 Emergency & Medical (Tap to Expand)</summary>
+          <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--red-border);">
+            <div class="emergency-row"><strong>Insurance:</strong> ${insuranceDisplay}</div>
+            <div class="emergency-row"><strong>Doctor:</strong> ${data.drName}</div>
+            <div class="emergency-row"><strong>Phone:</strong> <a href="tel:${data.drPhone}" style="color:var(--red-text);">${data.drPhone}</a></div>
+            ${emailHtml}
+            ${addrHtml}
+            ${hospHtml}
+          </div>
+        </details>
+        
+        ${anytimeHtml}
+        ${timelineHtml}
       `;
     }
 
@@ -938,26 +918,15 @@
     }
 
     async function completeTask(taskId) {
-      if(!confirm("Are you sure you want to mark this task as complete?")) return;
+      if(!confirm("Are you sure you want to mark this chore as complete?")) return;
       document.getElementById(`task-${taskId}`).style.opacity = "0.5";
       try {
         const url = `${API_URL}?action=completeTask&taskId=${encodeURIComponent(taskId)}`;
         const response = await fetch(url);
         const result = await response.json();
-        if (result.status === "success") { 
-            document.getElementById(`task-${taskId}`).style.display = "none"; 
-            alert("✅ Task Marked Complete! The family has been notified.");
-            // Immediately remove the element from the DOM without full reload
-            let el = document.getElementById(`task-${taskId}`);
-            if(el) el.remove(); 
-        } else { 
-            alert("Error: " + result.message); 
-            document.getElementById(`task-${taskId}`).style.opacity = "1"; 
-        }
-      } catch (err) { 
-          alert("Network error."); 
-          document.getElementById(`task-${taskId}`).style.opacity = "1"; 
-      }
+        if (result.status === "success") { document.getElementById(`task-${taskId}`).style.display = "none"; alert("✅ Chore Marked Complete! The family has been notified."); } 
+        else { alert("Error: " + result.message); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
+      } catch (err) { alert("Network error."); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
