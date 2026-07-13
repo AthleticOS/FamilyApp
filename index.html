@@ -89,7 +89,7 @@
     .legend-item { display: flex; align-items: center; gap: 4px; }
     .legend-color { width: 12px; height: 12px; border-radius: 3px; border: 1px solid rgba(255,255,255,0.1); }
 
-    .task-row { display: flex; justify-content: space-between; align-items: center; background: #201D25; border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; }
+    .task-row { display: flex; justify-content: space-between; align-items: center; background: #201D25; border: 1px solid var(--border); padding: 10px; border-radius: 6px; margin-bottom: 8px; font-size: 0.85rem; border-left: 3px solid #10B981;}
 
     /* INVENTORY AUDIT STYLES */
     .category-header { background: #2A2633; padding: 10px 15px; border-radius: 6px; font-weight: 800; display: flex; justify-content: space-between; cursor: pointer; margin-bottom: 8px; color: var(--accent); }
@@ -113,17 +113,16 @@
     .status-approved { background: #193122; color: #86EFAC; border: 1px solid #274E35;}
     .status-denied { background: #3B1515; color: #FCA5A5; border: 1px solid #5C282F;}
 
-    /* KIOSK / KIDS STYLES */
-    .emergency-card { background-color: var(--red-alert); border: 2px solid var(--red-border); border-radius: 8px; padding: 12px; margin-bottom: 15px; }
-    .emergency-header { color: var(--red-text); font-weight: 800; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; }
+    /* UNIFIED PLAN STYLES */
+    .emergency-card { background-color: var(--red-alert); border: 2px solid var(--red-border); border-radius: 8px; padding: 12px; margin-bottom: 15px; display: none;}
+    .emergency-header { color: var(--red-text); font-weight: 800; font-size: 0.85rem; text-transform: uppercase; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between;}
     .emergency-row { font-size: 0.85rem; margin-bottom: 5px; color: #D78A94;}
     .emergency-row strong { font-weight: 700; color: var(--red-text); }
-    .routine-row { display: flex; border-bottom: 1px solid var(--border); padding: 10px 0; }
-    .routine-row:last-child { border-bottom: none; }
-    .routine-time { width: 80px; font-weight: 800; font-size: 0.8rem; color: var(--accent); flex-shrink: 0; }
+    .routine-row { display: flex; background: #2A2633; border: 1px solid #433753; border-radius: 6px; padding: 10px; margin-bottom: 8px; border-left: 3px solid var(--accent); align-items: center;}
+    .routine-time { width: 80px; font-weight: 800; font-size: 0.8rem; color: var(--text-main); flex-shrink: 0; }
     .routine-content { flex-grow: 1; }
     .routine-activity { font-weight: 700; font-size: 0.95rem; color: var(--text-main); margin-bottom: 2px; }
-    .routine-notes { font-size: 0.8rem; color: var(--text-muted); }
+    .routine-notes { font-size: 0.75rem; color: #D5CDE3; line-height: 1.3;}
 
     .bottom-nav { position: fixed; bottom: 0; width: 100%; background: #141217; border-top: 1px solid var(--border); box-shadow: 0 -2px 15px rgba(0,0,0,0.5); display: none; z-index: 200; display: flex;}
     .nav-item { flex: 1; text-align: center; padding: 15px 0; font-size: 0.75rem; font-weight: 800; color: var(--text-muted); cursor: pointer; text-transform: uppercase; transition: background 0.2s; }
@@ -243,24 +242,34 @@
       </div>
     </div>
 
-    <div id="tab-kids" class="tab-content">
-      <div class="card">
-        <div class="card-header">Daily Routines & Medical</div>
-        <select class="status-select" id="child-selector" onchange="renderChildInfo()">
+    <!-- UNIFIED DAILY PLAN TAB -->
+    <div id="tab-plan" class="tab-content">
+      <div class="card" style="margin-bottom: 10px; padding: 10px 15px;">
+        <select class="status-select" id="child-selector" onchange="renderPlan()" style="margin-bottom: 0;">
           <option value="">Loading kids...</option>
         </select>
-        <div id="child-data-container">
-           <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Select a child above to view routines.</p>
+      </div>
+
+      <button id="btn-emergency-toggle" onclick="toggleEmergency()" style="width: 100%; background-color: var(--red-border); color: #FFF; border: none; padding: 10px; border-radius: 8px; font-size: 0.85rem; font-weight: 800; cursor: pointer; display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <span>🚨 Show Emergency & Medical Info</span> <span>▼</span>
+      </button>
+
+      <div class="emergency-card" id="emergency-container">
+         <p style="text-align: center; color: var(--red-text); font-size: 0.85rem; margin:0;">Loading medical data...</p>
+      </div>
+
+      <div class="card">
+        <div class="card-header" style="color: #86EFAC;">📌 Anytime Chores</div>
+        <div class="explainer-box">Tasks to complete whenever you have a free moment today.</div>
+        <div id="anytime-tasks-list">
+          <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">No anytime tasks today!</p>
         </div>
       </div>
-    </div>
 
-    <div id="tab-tasks" class="tab-content">
       <div class="card">
-        <div class="card-header">Assigned Tasks</div>
-        <div class="explainer-box">Tap the checkmark when a task is completed to notify the family.</div>
-        <div id="tasks-list">
-          <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Loading tasks...</p>
+        <div class="card-header" style="color: var(--accent);">📅 Today's Itinerary</div>
+        <div id="timeline-list">
+           <p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">Select a child to view timeline.</p>
         </div>
       </div>
       
@@ -323,8 +332,7 @@
   <div class="bottom-nav" id="bottom-nav" style="display: none;">
     <div class="nav-item active" onclick="switchTab('timecard')">Punch</div>
     <div class="nav-item" onclick="switchTab('schedule')">Shifts</div>
-    <div class="nav-item" onclick="switchTab('kids')">Kids</div>
-    <div class="nav-item" onclick="switchTab('tasks')">Tasks</div>
+    <div class="nav-item" onclick="switchTab('plan')">Plan</div>
     <div class="nav-item" id="nav-profile" onclick="switchTab('profile')">Profile</div>
   </div>
 
@@ -335,6 +343,7 @@
     let globalKidsData = {};
     let globalAllShifts = [];
     let globalSupplies = []; 
+    let globalTasks = [];
     let currentCalMonth = new Date(); 
 
     function getDistanceFromLatLonInM(lat1, lon1, lat2, lon2) {
@@ -393,6 +402,18 @@
         document.getElementById('schedule-calendar').style.display = 'block';
         renderCalendar();
       }
+    }
+
+    function toggleEmergency() {
+        const ec = document.getElementById('emergency-container');
+        const btn = document.getElementById('btn-emergency-toggle');
+        if (ec.style.display === 'block') {
+            ec.style.display = 'none';
+            btn.innerHTML = '<span>🚨 Show Emergency & Medical Info</span> <span>▼</span>';
+        } else {
+            ec.style.display = 'block';
+            btn.innerHTML = '<span>🚨 Hide Emergency & Medical Info</span> <span>▲</span>';
+        }
     }
 
     function changeMonth(offset) {
@@ -578,26 +599,7 @@
           document.getElementById('metric-ot-week').innerText = (result.weekOT || 0).toFixed(1);
           document.getElementById('metric-ot-month').innerText = (result.monthOT || 0).toFixed(1);
 
-          const tList = document.getElementById('tasks-list'); tList.innerHTML = "";
-          if (!result.tasks || result.tasks.length === 0) {
-            tList.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No pending tasks. Great job!</p>`;
-          } else {
-            result.tasks.forEach(task => {
-              // Only inject description HTML if details actually exist
-              let notesHtml = task.notes ? `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; line-height:1.3;">${task.notes}</div>` : '';
-              
-              tList.innerHTML += `
-                <div class="task-row" id="task-${task.id}">
-                  <div style="flex-grow: 1; padding-right: 15px;">
-                    <strong style="display:block; color:var(--text-main);">${task.name}</strong>
-                    <span style="font-size:0.7rem; color:var(--accent);">Due: ${task.due}</span>
-                    ${notesHtml}
-                  </div>
-                  <button class="btn-submit btn-small" style="width:auto; padding:8px 12px; background-color:#15803D; flex-shrink: 0; align-self: center;" onclick="completeTask('${task.id}')">✓</button>
-                </div>
-              `;
-            });
-          }
+          globalTasks = result.tasks || [];
 
           globalSupplies = result.supplies || [];
           const invContainer = document.getElementById('inventory-audit-container');
@@ -652,9 +654,9 @@
           }
           if (firstKid) {
             kidSelector.value = firstKid;
-            renderChildInfo();
+            renderPlan();
           } else {
-             document.getElementById('child-data-container').innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No child profiles found.</p>`;
+             document.getElementById('timeline-list').innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No child profiles found.</p>`;
           }
         } else {
           alert("Dashboard Error: " + (result.message || "Unknown API error"));
@@ -721,23 +723,57 @@
         }
     }
 
-    function renderChildInfo() {
+    function renderPlan() {
       const selectedKid = document.getElementById('child-selector').value;
-      const container = document.getElementById('child-data-container');
+      const ec = document.getElementById('emergency-container');
+      const anyList = document.getElementById('anytime-tasks-list');
+      const timeList = document.getElementById('timeline-list');
+
+      let anytimeHtml = "";
+      let timelineItems = [];
+
+      // Sort tasks into Anytime vs Timed
+      globalTasks.forEach(task => {
+          let notesHtml = task.notes ? `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; line-height:1.3;">${task.notes}</div>` : '';
+          let taskHtml = `
+            <div class="task-row" id="task-${task.id}">
+              <div style="flex-grow: 1; padding-right: 15px;">
+                <strong style="display:block; color:var(--text-main);">${task.name}</strong>
+                ${notesHtml}
+              </div>
+              <button class="btn-submit btn-small" style="width:auto; padding:8px 12px; background-color:#15803D; flex-shrink: 0; align-self: center;" onclick="completeTask('${task.id}')">✓</button>
+            </div>
+          `;
+
+          // If the task has no specific time (12:00 AM or 0 timestamp) it goes to anytime bucket
+          if (task.due.includes("12:00 AM") || task.due === "No Date" || task.timestamp === 0) {
+              anytimeHtml += taskHtml;
+          } else {
+              timelineItems.push({
+                  timeSort: task.timestamp,
+                  timeStr: new Date(task.timestamp).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                  type: 'task',
+                  html: taskHtml
+              });
+          }
+      });
+
+      if(anytimeHtml === "") anytimeHtml = `<p style="text-align: center; color: var(--text-muted); font-size: 0.85rem;">No anytime chores today!</p>`;
+      anyList.innerHTML = anytimeHtml;
+
       if (!selectedKid || !globalKidsData[selectedKid]) {
-        container.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">Select a child to view details.</p>`;
+        timeList.innerHTML = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">Select a child to view timeline.</p>`;
+        ec.innerHTML = "";
         return;
       }
-      
+
       const data = globalKidsData[selectedKid];
-      
-      let routineHtml = "";
-      if (!data.routine || data.routine.length === 0) {
-        routineHtml = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem; margin-top: 15px;">No routines loaded for ${data.name}.</p>`;
-      } else {
+
+      // Add Routines to Timeline
+      if (data.routine && data.routine.length > 0) {
         data.routine.forEach(r => {
           let notesStr = r.notes ? `<div class="routine-notes">${r.notes}</div>` : '';
-          routineHtml += `
+          let routineHtml = `
             <div class="routine-row">
               <div class="routine-time">${r.start}<br><span style="color:var(--text-muted); font-weight:600;">${r.end}</span></div>
               <div class="routine-content">
@@ -746,18 +782,46 @@
               </div>
             </div>
           `;
+          timelineItems.push({
+              timeSort: r.timeSort,
+              timeStr: r.start,
+              type: 'routine',
+              html: routineHtml
+          });
         });
       }
 
+      // Sort and Render Timeline
+      timelineItems.sort((a, b) => a.timeSort - b.timeSort);
+      
+      let finalTimelineHtml = "";
+      if (timelineItems.length === 0) {
+          finalTimelineHtml = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No scheduled events or routines today.</p>`;
+      } else {
+          timelineItems.forEach(item => {
+              if (item.type === 'task') {
+                 // Wrap task with time indicator to match routine layout visually
+                 finalTimelineHtml += `
+                    <div style="display:flex; align-items:center; margin-bottom: 8px;">
+                       <div style="width: 80px; font-weight: 800; font-size: 0.8rem; color: #10B981; flex-shrink: 0; padding-left:10px;">${item.timeStr}</div>
+                       <div style="flex-grow:1;">${item.html}</div>
+                    </div>
+                 `;
+              } else {
+                 finalTimelineHtml += item.html;
+              }
+          });
+      }
+      timeList.innerHTML = finalTimelineHtml;
+
+      // Render Emergency Data
       let insuranceDisplay = String(data.insurance || "");
       if (insuranceDisplay !== "Not provided" && insuranceDisplay.trim() !== "") {
         let imgUrl = insuranceDisplay;
         const driveMatch = imgUrl.match(/(?:file\/d\/|open\?id=|id=)([\w_-]{25,})/i);
-        
         if (driveMatch) {
-          const fileId = driveMatch[1];
-          imgUrl = `https://lh3.googleusercontent.com/d/${fileId}`;
-          insuranceDisplay = `<br><a href="https://drive.google.com/file/d/${fileId}/view" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-height: 120px; width: auto; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
+          imgUrl = `https://lh3.googleusercontent.com/d/${driveMatch[1]}`;
+          insuranceDisplay = `<br><a href="https://drive.google.com/file/d/${driveMatch[1]}/view" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-height: 120px; width: auto; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
         } else if (imgUrl.startsWith("http")) {
           insuranceDisplay = `<br><a href="${insuranceDisplay}" target="_blank"><img src="${imgUrl}" alt="Insurance Card" style="max-height: 120px; width: auto; border-radius: 6px; margin-top: 8px; border: 1px solid var(--red-border); box-shadow: 0 2px 4px rgba(0,0,0,0.1);"></a>`;
         } else {
@@ -766,32 +830,18 @@
       }
 
       let emailHtml = data.drEmail !== "Not provided" ? `<div class="emergency-row"><strong>Doctor Email:</strong> <a href="mailto:${data.drEmail}" style="color:var(--red-text);">${data.drEmail}</a></div>` : '';
-      
       let addrQuery = encodeURIComponent(data.drAddress);
       let addrHtml = data.drAddress !== "Not provided" ? `<div class="emergency-row"><strong>Doctor Address:</strong> <a href="https://maps.google.com/?q=${addrQuery}" target="_blank" style="color:var(--red-text); text-decoration:underline;">${data.drAddress}</a></div>` : '';
-
       let hospQuery = encodeURIComponent(data.emergencyLoc);
       let hospHtml = data.emergencyLoc !== "Not provided" ? `<div class="emergency-row"><strong>Hospital:</strong> <a href="https://maps.google.com/?q=${hospQuery}" target="_blank" style="color:var(--red-text); text-decoration:underline;">${data.emergencyLoc}</a></div>` : `<div class="emergency-row"><strong>Hospital:</strong> Not provided</div>`;
 
-      container.innerHTML = `
-        <div style="margin-bottom: 20px;">
-          <div style="background-color: var(--primary); color: #F3F2F4; padding: 12px 15px; border-radius: 8px; font-weight: 800; font-size: 1.05rem; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; border-bottom: 3px solid #433753;">
-            <span>📅</span> ${data.name}'s Daily Schedule
-          </div>
-          <div style="background:var(--card-bg); border:1px solid var(--border); border-radius:8px; padding:10px;">
-            ${routineHtml}
-          </div>
-        </div>
-
-        <div class="emergency-card">
-          <div class="emergency-header">🚨 Emergency Medical Info</div>
-          <div class="emergency-row"><strong>Insurance:</strong> ${insuranceDisplay}</div>
-          <div class="emergency-row"><strong>Doctor:</strong> ${data.drName}</div>
-          <div class="emergency-row"><strong>Phone:</strong> <a href="tel:${data.drPhone}" style="color:var(--red-text);">${data.drPhone}</a></div>
-          ${emailHtml}
-          ${addrHtml}
-          ${hospHtml}
-        </div>
+      ec.innerHTML = `
+        <div class="emergency-row"><strong>Insurance:</strong> ${insuranceDisplay}</div>
+        <div class="emergency-row"><strong>Doctor:</strong> ${data.drName}</div>
+        <div class="emergency-row"><strong>Phone:</strong> <a href="tel:${data.drPhone}" style="color:var(--red-text);">${data.drPhone}</a></div>
+        ${emailHtml}
+        ${addrHtml}
+        ${hospHtml}
       `;
     }
 
@@ -894,9 +944,20 @@
         const url = `${API_URL}?action=completeTask&taskId=${encodeURIComponent(taskId)}`;
         const response = await fetch(url);
         const result = await response.json();
-        if (result.status === "success") { document.getElementById(`task-${taskId}`).style.display = "none"; alert("✅ Task Marked Complete! The family has been notified."); } 
-        else { alert("Error: " + result.message); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
-      } catch (err) { alert("Network error."); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
+        if (result.status === "success") { 
+            document.getElementById(`task-${taskId}`).style.display = "none"; 
+            alert("✅ Task Marked Complete! The family has been notified.");
+            // Immediately remove the element from the DOM without full reload
+            let el = document.getElementById(`task-${taskId}`);
+            if(el) el.remove(); 
+        } else { 
+            alert("Error: " + result.message); 
+            document.getElementById(`task-${taskId}`).style.opacity = "1"; 
+        }
+      } catch (err) { 
+          alert("Network error."); 
+          document.getElementById(`task-${taskId}`).style.opacity = "1"; 
+      }
     }
 
     document.addEventListener("DOMContentLoaded", () => {
