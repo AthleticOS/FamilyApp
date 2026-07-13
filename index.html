@@ -738,11 +738,17 @@
           <div style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">📌 Flexible / Anytime Chores</div>`;
         
         anytimeTasks.forEach(t => {
+          // Extracts just the date (e.g., "Jul 13") and hides the 12:00 AM stamp
+          let dateStr = t.due.includes(',') ? t.due.split(',')[0] : t.due;
+          let dateBadge = dateStr !== "No Date" ? `<span style="font-size:0.7rem; color:var(--accent); display:block; margin-top:2px; font-weight: 700;">📅 Due: ${dateStr}</span>` : '';
+          
           let notesStr = t.notes ? `<div style="font-size:0.75rem; color:var(--text-muted); margin-top:4px; line-height:1.3;">${t.notes}</div>` : '';
+          
           anytimeHtml += `
             <div class="task-row" id="task-${t.id}">
               <div style="flex-grow: 1; padding-right: 15px;">
                 <strong style="display:block; color:var(--text-main);">${t.name}</strong>
+                ${dateBadge}
                 ${notesStr}
               </div>
               <button class="btn-submit btn-small" style="width:auto; padding:8px 12px; background-color:#15803D; flex-shrink: 0; align-self: center;" onclick="completeTask('${t.id}')">✓</button>
