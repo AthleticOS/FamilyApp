@@ -763,7 +763,7 @@
       if (timeline.length === 0) {
         timelineHtml = `<p style="text-align:center; color:var(--text-muted); font-size:0.85rem;">No routines or tasks scheduled today.</p>`;
       } else {
-        timelineHtml += `<div style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">🕒 Cora B's Chronological Itinerary</div>`;
+        timelineHtml += `<div style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:8px;">🕒 ${data.name}'s Schedule</div>`;
         
         timeline.forEach(item => {
           let notesStr = item.notes ? `<div class="routine-notes" style="margin-top:4px;">${item.notes}</div>` : '';
