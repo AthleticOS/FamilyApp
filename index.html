@@ -742,7 +742,7 @@
           anytimeHtml += `
             <div class="task-row" id="task-${t.id}">
               <div style="flex-grow: 1; padding-right: 15px;">
-                <strong style="display:block; color:var(--text-main);">${t.title}</strong>
+                <strong style="display:block; color:var(--text-main);">${t.name}</strong>
                 ${notesStr}
               </div>
               <button class="btn-submit btn-small" style="width:auto; padding:8px 12px; background-color:#15803D; flex-shrink: 0; align-self: center;" onclick="completeTask('${t.id}')">✓</button>
