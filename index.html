@@ -323,7 +323,7 @@
 
   <script>
     const API_URL = "https://script.google.com/macros/s/AKfycbxC-bqxIJJXMsz7B7NgYbOf3iEXUPiDWPU9yW_ThsvN8U7bo-4pSU6VdRiomwqqIJbW3A/exec"; 
-    const HOME_LAT = 13.710583; const HOME_LNG = 100.463750; const ALLOWED_RADIUS_METERS = 150;
+    const HOME_LAT = 13.67804990042383; const HOME_LNG = 100.44191115595879; const ALLOWED_RADIUS_METERS = 100;
     
     let globalKidsData = {};
     let globalTasks = [];
@@ -853,7 +853,7 @@
         const result = await response.json();
         if (result.status === "success" || result.message === "You are already clocked in.") {
           sessionStorage.setItem('has_active_shift', "true"); updateClockButtons(); loadDashboardData(); 
-          if(result.status === "success") alert("✅ SUCCESS: " + result.message + "\n\nReminder: You must remain within 150 meters of the residence to clock out later.");
+          if(result.status === "success") alert("✅ SUCCESS: " + result.message + "\n\nReminder: You must remain within 100 meters of the residence to clock out later.");
         } else alert("Error: " + result.message);
       } catch (err) { alert("Network error."); } finally { 
         btnIn.innerText = "CLOCK IN"; btnIn.disabled = false; 
