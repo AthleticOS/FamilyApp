@@ -549,8 +549,9 @@
               let notesHtml = shift.instructions ? `<div class="shift-notes">${shift.instructions}</div>` : '';
               let childBadgeHtml = shift.child ? `<div class="child-badge">👧 ${shift.child}</div>` : '';
               
-              let mapQuery = shift.location === "Residence" ? encodeURIComponent("Ban Klang Mueang S-Sense Sathorn-Taksin 2, 2 กท.1001 Bang Kho, Chom Thong, Bangkok 10150, Soi 17, 99/472") : encodeURIComponent(shift.location);
-              let locHtml = shift.location ? `<a href="https://maps.google.com/?q=${mapQuery}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${shift.location} (Tap for Map)</a>` : '';
+              let mapUrl = shift.location === "Residence" ? "https://www.google.com/maps/place/%E0%B8%AB%E0%B8%A1%E0%B8%B9%E0%B9%88%E0%B8%9A%E0%B9%89%E0%B8%B2%E0%B8%99%E0%B8%84%E0%B8%B2%E0%B8%8B%E0%B8%B2%E0%B8%A7%E0%B8%B4%E0%B8%A5%E0%B8%A5%E0%B9%8C%E0%B8%9E%E0%B8%A3%E0%B8%B0%E0%B8%A3%E0%B8%B2%E0%B8%A1%E0%B8%97%E0%B8%B5%E0%B9%88+2-2/@13.6741376,100.4390529,17z/data=!3m1!4b1!4m6!3m5!1s0x30e2bd003d11ab39:0x9e6c5e4849ec808f!8m2!3d13.6741324!4d100.4416278!16s%2Fg%2F11xz4kcbph?authuser=1&entry=ttu&g_ep=EgoyMDI2MDcyOS4wIKXMDSoASAFQAw%3D%3D" : `https://maps.google.com/?q=${encodeURIComponent(shift.location)}`;
+              let displayAddress = shift.location === "Residence" ? "128 คาซ่าวิลล์ 74 Rama II Soi 50, Samae Dam, Khet Bang Khun Thian, Krung Thep Maha Nakhon 10150" : shift.location;
+              let locHtml = shift.location ? `<a href="${mapUrl}" target="_blank" style="text-decoration:none; display:block; font-size: 0.75rem; color: var(--accent); margin-top: 6px; font-weight:700;">📍 ${displayAddress} (Tap for Map)</a>` : '';
               
               schedList.innerHTML += `
                 <div class="shift-card">
