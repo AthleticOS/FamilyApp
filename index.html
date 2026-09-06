@@ -1005,7 +1005,12 @@
         const url = `${API_URL}?action=completeTask&taskId=${encodeURIComponent(taskId)}`;
         const response = await fetch(url);
         const result = await response.json();
-        if (result.status === "success") { document.getElementById(`task-${taskId}`).style.display = "none"; alert("✅ Chore Marked Complete! The family has been notified."); } 
+        if (result.status === "success") { 
+          document.getElementById(`task-${taskId}`).style.display = "none"; 
+          // New update: actively filter it from memory so it won't reappear on child change
+          globalTasks = globalTasks.filter(t => String(t.id) !== String(taskId));
+          alert("✅ Chore Marked Complete! The family has been notified."); 
+        } 
         else { alert("Error: " + result.message); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
       } catch (err) { alert("Network error."); document.getElementById(`task-${taskId}`).style.opacity = "1"; }
     }
